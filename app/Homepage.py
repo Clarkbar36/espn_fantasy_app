@@ -39,5 +39,8 @@ st.write(
 st.subheader("🧭 Team Radar")
 st.write(
     "Visualize each team's strengths and weaknesses using radar charts. "
-    "This snapshot shows how your team stacks up in each category based on total season stats so far."
+    "Each axis represents a different stat category, and each team's line traces their **rank** in those stats. "
+    "**The farther a point is from the center, the better the team ranks** (with 1st place being at the outer edge). "
+    "Conversely, points closer to the center indicate lower rankings in that category. "
+    "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
 )

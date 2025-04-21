@@ -13,7 +13,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
+col1, col2, col3 = st.columns([1, 2, 3])
 
 db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.db')
 
@@ -24,7 +24,8 @@ df = pd.read_sql("SELECT * FROM cumulative", conn)
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
-selected_stat = st.selectbox("Select stats to view", all_categories)
+with col1:
+    selected_stat = st.selectbox("Select stats to view", all_categories)
 
 # Plot for each selected stat
 
@@ -37,6 +38,35 @@ y_min = min_stat - 0.05 * (max_stat - min_stat)
 y_max = max_stat + 0.05 * (max_stat - min_stat)
 
 week = df["period"].max()
+
+min_week = int(df["period"].min())
+max_week = int(df["period"].max())
+
+with col2:
+    week_range = st.slider(
+        "Select Week Range",
+        min_value=min_week,
+        max_value=max_week,
+        value=(min_week, max_week),
+        step=1
+    )
+
+all_teams = sorted(df['team'].unique())
+with col3:
+# New team selector (below the columns for spacing)
+    selected_teams = st.multiselect(
+        "Select Teams",
+        options=all_teams,
+        default=all_teams  # Show all by default
+    )
+
+# Filter data
+df_filtered = df[
+    (df["period"] >= week_range[0]) &
+    (df["period"] <= week_range[1]) &
+    (df["team"].isin(selected_teams))
+]
+
 with st.container():
     # Create the Altair chart
     chart_title = f"{selected_stat} - Over The Season (Updated through Week {week})"
@@ -45,7 +75,7 @@ with st.container():
     else:
         y_axis_format = None  # Default formatting
 
-    chart = alt.Chart(df).mark_line(point=True).encode(
+    chart = alt.Chart(df_filtered).mark_line(point=True).encode(
         x=alt.X("period:O", title="Week"),
         y=alt.Y(
             f"{selected_stat}:Q",
