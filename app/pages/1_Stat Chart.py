@@ -20,7 +20,7 @@ db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.
 conn = sqlite3.connect(db_path)
 
 # Load data
-df = pd.read_sql("SELECT * FROM boxscore_wide", conn)
+df = pd.read_sql("SELECT * FROM cumulative", conn)
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
