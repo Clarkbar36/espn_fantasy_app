@@ -62,7 +62,7 @@ with st.container():
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                autorange='reversed',  # This flips the direction: 1 (best) is center
+                range=[max(ranks), 1],  # This flips the direction: 1 (best) is center
                 tickmode='linear',
                 tick0=1,
                 dtick=1,

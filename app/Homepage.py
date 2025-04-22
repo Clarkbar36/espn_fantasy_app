@@ -20,12 +20,12 @@ conn.close()
 
 st.title("🏟️ Paychex Baseball League Dashboard")
 st.write(f"📊 Data last updated through **Week {period}**")
-st.write("Welcome to the 2025 season dashboard! Use the sidebar to explore different views of your league’s performance.")
+st.write("Welcome to the 2025 season dashboard! Use the sidebar to explore different views of your team’s performance.")
 st.markdown("---")
 
 st.subheader("📈 Stat Chart")
 st.write(
-    "Track cumulative totals for each stat week by week — every category is up for a prize. "
+    "Track cumulative totals for each stat week by week. "
     "As the season unfolds, this chart will highlight the frontrunners in key categories like OBP, Runs, ERA, and more. "
     "Use it to see where your team stands in the race for end-of-season stat awards."
 )

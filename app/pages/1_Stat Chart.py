@@ -69,7 +69,7 @@ df_filtered = df[
 
 with st.container():
     # Create the Altair chart
-    chart_title = f"{selected_stat} - Over The Season (Updated through Week {week})"
+    chart_title = f"{selected_stat}: Week {week_range[0]} - Week {week_range[1]}"
     if selected_stat in ["OBP", "ERA", "WHIP"]:
         y_axis_format = ".3f"  # 3 decimal places
     else:
@@ -95,5 +95,8 @@ with st.container():
         title=chart_title,
         width=3000,
         height=750
-    )
+    ).configure_title(
+    fontSize=25,
+    font='Helvetica'
+)
     st.altair_chart(chart, use_container_width=True)
