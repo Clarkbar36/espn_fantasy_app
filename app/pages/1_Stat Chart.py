@@ -22,7 +22,7 @@ conn = sqlite3.connect(db_path)
 
 # Load data - select specific columns to avoid duplicates from JOIN
 df = pd.read_sql("""
-  SELECT bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev 
+  SELECT bw.DATE, bw.period, bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev
   FROM boxscore_wide bw 
   LEFT JOIN teams on bw.teamId = teams.teamId
 """, conn)
