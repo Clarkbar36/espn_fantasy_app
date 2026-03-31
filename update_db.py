@@ -1,12 +1,22 @@
-from espn import get_league, newest_matchup, transform_matchups, write_table, powerscore
+from espn import get_league, get_teams, get_draft, transform_matchups, write_table, powerscore
+from datetime import date
 
 league = get_league()
 
-matchup_id = newest_matchup(db = 'paychex.lg')
+if date.today() == date(date.today().year, 3, 30) and len(league.draft) > 0:
+    draft = get_draft(league, league.year)
 
-matchups = league.box_scores(matchup_period=matchup_id)
+    write_table(db = 'paychex.lg', data = draft, table_name= 'draft', append_type= 'append')
 
-matchups_to_load = transform_matchups(matchups, matchup_id)
+teams = get_teams(league)
+
+write_table(db = 'paychex.lg', data = teams, table_name= 'teams', append_type= 'replace')
+
+#matchup_id = newest_matchup(db = 'paychex.lg')
+
+matchups = league.box_scores(matchup_period=league.currentMatchupPeriod)
+
+matchups_to_load = transform_matchups(matchups, league.currentMatchupPeriod)
 
 write_table(db = 'paychex.lg', data = matchups_to_load, table_name= 'boxscore_wide', append_type= 'append')
 
@@ -15,4 +25,6 @@ write_table(db = 'paychex.lg', data = total_powerscore, table_name= 'total_power
 
 cum_powerscore = powerscore('cumulative')
 write_table(db = 'paychex.lg', data = cum_powerscore, table_name= 'cum_powerscore', append_type= 'replace')
+
+## table for stats daily, for graphic
 

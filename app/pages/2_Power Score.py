@@ -17,7 +17,7 @@ db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.
 conn = sqlite3.connect(db_path)
 
 # Load data
-query = '''SELECT team AS Team,
+query = '''SELECT teamName AS Team,
  PowerScore,
  OBP_rank AS'OBP Rank',
  R_rank AS 'R Rank',
@@ -30,13 +30,14 @@ query = '''SELECT team AS Team,
  QS_rank AS 'QS Rank',
  K_rank AS 'K Rank',
  SVHD_rank AS 'SVHLD Rank'
- FROM total_powerscore'''
+ FROM total_powerscore
+LEFT JOIN teams on total_powerscore.teamId = teams.teamId'''
 df = pd.read_sql(query, conn)
 
 cursor = conn.cursor()
 
 # Query to get the maximum value of a specific column, e.g., 'OBP' from the 'cumulative' table
-cursor.execute("SELECT MAX(period) FROM boxscore_wide")
+cursor.execute("SELECT MAX(DATE) FROM boxscore_wide")
 
 period = cursor.fetchone()[0]
 

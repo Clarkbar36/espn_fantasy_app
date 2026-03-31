@@ -20,7 +20,7 @@ db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.
 conn = sqlite3.connect(db_path)
 
 # Load data
-df = pd.read_sql("SELECT * FROM cumulative", conn)
+df = pd.read_sql("SELECT * FROM cumulative LEFT JOIN teams on cumulative.teamId = teams.teamId", conn)
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
@@ -37,21 +37,21 @@ max_stat = df[selected_stat].max()
 y_min = min_stat - 0.05 * (max_stat - min_stat)
 y_max = max_stat + 0.05 * (max_stat - min_stat)
 
-week = df["period"].max()
+week = df["DATE"].max()
 
-min_week = int(df["period"].min())
-max_week = int(df["period"].max())
+min_week = int(df["DATE"].min())
+max_week = int(df["DATE"].max())
 
 with col2:
     week_range = st.slider(
-        "Select Week Range",
+        "Select Date Range",
         min_value=min_week,
         max_value=max_week,
         value=(min_week, max_week),
         step=1
     )
 
-all_teams = sorted(df['team'].unique())
+all_teams = sorted(df['teamName'].unique())
 with col3:
 # New team selector (below the columns for spacing)
     selected_teams = st.multiselect(
@@ -62,14 +62,14 @@ with col3:
 
 # Filter data
 df_filtered = df[
-    (df["period"] >= week_range[0]) &
-    (df["period"] <= week_range[1]) &
-    (df["team"].isin(selected_teams))
+    (df["DATE"] >= week_range[0]) &
+    (df["DATE"] <= week_range[1]) &
+    (df["teamName"].isin(selected_teams))
 ]
 
 with st.container():
     # Create the Altair chart
-    chart_title = f"{selected_stat}: Week {week_range[0]} - Week {week_range[1]}"
+    chart_title = f"{selected_stat}: {week_range[0]} - {week_range[1]}"
     if selected_stat in ["OBP", "ERA", "WHIP"]:
         y_axis_format = ".3f"  # 3 decimal places
     else:

@@ -1,13 +1,48 @@
 import pandas as pd
+from datetime import date
 
+def get_teams(league):
+    teams = league.teams
+    owners_list = []
+    for t in teams:
+        owner_info = [{
+            'teamId': t.team_id,
+            'ownerID': t.owners[0]['id'],
+            'teamName': t.team_name,
+            'teamAbbrev': t.team_abbrev,
+            'ownerName': t.owners[0]['firstName'].title().strip() + ' ' + t.owners[0]['lastName'].title().strip(),
+        }]
+        owners_list.append(owner_info[0])
 
+    owners_df = pd.DataFrame(owners_list)
+    return owners_df
 
+def get_draft(league, lg_year):
+    draft = league.draft
+    draft_list = []
+    for d in draft:
+        pick_info = [{'year': lg_year,
+                      'round': d.round_num,
+                      'roundPick': d.round_pick,
+                      'playerId': d.playerId,
+                      'playerName': d.playerName,
+                      'keeperStatus': d.keeper_status,
+                      'teamName': d.team.team_name,
+                      'teamID': d.team.team_id,
+                      'ownerName': d.team.owners[0]['firstName'].title().strip() + ' ' + d.team.owners[0][
+                          'lastName'].title().strip(),
+                      'ownerID': d.team.owners[0]['id'],
+                      }]
+        draft_list.append(pick_info[0])
 
-def create_team_df(team_stats, team_name, matchup_period):
+    draft_df = pd.DataFrame(draft_list)
+    return draft_df
+
+def create_team_df(team_stats, team_id, matchup_period):
     df = pd.DataFrame.from_dict(team_stats, orient='index', columns=['value', 'result'])
     df.reset_index(inplace=True)
     df.columns = ['stat', 'value', 'result']
-    df['team'] = team_name
+    df['teamId'] = team_id
     df['period'] = matchup_period
     return df
 
@@ -25,8 +60,8 @@ def transform_matchups(matchups, matchup_id):
     matchup_dfs = []
 
     for match in matchups:
-        away_team_df = create_team_df(match.away_stats, match.away_team.team_name, matchup_id)
-        home_team_df = create_team_df(match.home_stats, match.home_team.team_name, matchup_id)
+        away_team_df = create_team_df(match.away_stats, match.away_team.team_id, matchup_id)
+        home_team_df = create_team_df(match.home_stats, match.home_team.team_id, matchup_id)
 
         # Combine both dataframes into a single one for the matchup
         matchup_dfs.append(pd.concat([away_team_df, home_team_df]))
@@ -34,12 +69,13 @@ def transform_matchups(matchups, matchup_id):
     all_matchups = pd.concat(matchup_dfs, ignore_index=True)
 
     pivoted_matchups = all_matchups.pivot_table(
-        index=['team', 'period'],  # group by these
+        index=['teamId', 'period'],  # group by these
         columns='stat',  # columns will be each stat
         values='value',  # values come from this column
         aggfunc='sum'  # just in case you have duplicates
     ).reset_index()
 
+    pivoted_matchups['DATE'] = date.today().strftime("%m-%d-%Y")
     return pivoted_matchups
 
 def powerscore(type):
@@ -61,7 +97,7 @@ def powerscore(type):
     if type == 'total':
         data = read_table(db='paychex.lg', table_name='totals')
 
-        cols = ['team'] + list(categories.keys())
+        cols = ['teamId'] + list(categories.keys())
         data = data[cols]
 
         # Create rankings per stat
@@ -78,7 +114,7 @@ def powerscore(type):
         return data
     else:
         data = read_table(db='paychex.lg', table_name='cumulative')
-        cols = ['team', 'period'] + list(categories.keys())
+        cols = ['teamId', 'period'] + list(categories.keys())
         data = data[cols]
 
         data = data.groupby("period", group_keys=False).apply(

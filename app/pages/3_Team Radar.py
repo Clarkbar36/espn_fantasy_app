@@ -18,13 +18,13 @@ db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.
 conn = sqlite3.connect(db_path)
 
 # Load the data from the total_powerscore table
-query = "SELECT * FROM total_powerscore"
+query = "SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore.teamId = teams.teamId"
 df = pd.read_sql(query, conn)
 
 cursor = conn.cursor()
 
 # Query to get the maximum value of a specific column, e.g., 'OBP' from the 'cumulative' table
-cursor.execute("SELECT MAX(period) FROM boxscore_wide")
+cursor.execute("SELECT MAX(DATE) FROM boxscore_wide")
 
 period = cursor.fetchone()[0]
 
@@ -33,10 +33,10 @@ conn.close()
 
 with st.container():
     # Select the team for which you want to display the radar chart
-    team_selected = st.selectbox("Select Team", sorted(df['team'].unique()))
+    team_selected = st.selectbox("Select Team", sorted(df['teamName'].unique()))
 
     # Filter the data for the selected team
-    team_data = df[df['team'] == team_selected].iloc[0]
+    team_data = df[df['teamName'] == team_selected].iloc[0]
 
     # List of rank columns (no need for stat columns, only rank columns)
     rank_columns = ['OBP_rank', 'R_rank', 'RBI_rank', 'SB_rank', 'TB_rank', 'RC_rank', 'ERA_rank', 'WHIP_rank', 'QS_rank', 'K_rank', 'SVHD_rank']
@@ -77,7 +77,7 @@ with st.container():
                     font=dict(size=24)),
         annotations=[
             dict(
-                text=f"Updated through week {period}",
+                text=f"Updated through {period}",
                 x=0.5,
                 y=1.07,  # slightly above the plot
                 xref='paper',
