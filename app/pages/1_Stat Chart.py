@@ -22,9 +22,9 @@ conn = sqlite3.connect(db_path)
 
 # Load data - select specific columns to avoid duplicates from JOIN
 df = pd.read_sql("""
-    SELECT cumulative.*, teams.teamName, teams.teamAbbrev
-    FROM cumulative
-    LEFT JOIN teams ON cumulative.teamId = teams.teamId
+  SELECT bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev 
+  FROM boxscore_wide bw 
+  LEFT JOIN teams on bw.teamId = teams.teamId
 """, conn)
 
 # Select categories to plot
