@@ -17,6 +17,8 @@ col1, col2, col3 = st.columns([1, 2, 3])
 
 db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.db')
 
+db_path = os.path.join('db/paychex.lg.db')
+
 conn = sqlite3.connect(db_path)
 
 # Load data
@@ -39,8 +41,8 @@ y_max = max_stat + 0.05 * (max_stat - min_stat)
 
 week = df["DATE"].max()
 
-min_week = int(df["DATE"].min())
-max_week = int(df["DATE"].max())
+min_week = df["DATE"].min()
+max_week = df["DATE"].max()
 
 with col2:
     week_range = st.slider(
@@ -76,7 +78,7 @@ with st.container():
         y_axis_format = None  # Default formatting
 
     chart = alt.Chart(df_filtered).mark_line(point=True).encode(
-        x=alt.X("period:O", title="Week"),
+        x=alt.X("period:O", title="Day"),
         y=alt.Y(
             f"{selected_stat}:Q",
             title=selected_stat,
