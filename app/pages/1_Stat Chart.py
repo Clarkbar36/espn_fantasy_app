@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 import altair as alt
 import os
+from datetime import timedelta
 
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -39,18 +40,19 @@ max_stat = df[selected_stat].max()
 y_min = min_stat - 0.05 * (max_stat - min_stat)
 y_max = max_stat + 0.05 * (max_stat - min_stat)
 
-week = df["DATE"].max()
+# Convert DATE strings to datetime.date objects
+df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y").dt.date
 
-min_week = df["DATE"].min()
-max_week = df["DATE"].max()
+min_date = df["DATE"].min()
+max_date = df["DATE"].max()
 
 with col2:
     week_range = st.slider(
         "Select Date Range",
-        min_value=min_week,
-        max_value=max_week,
-        value=(min_week, max_week),
-        step=1
+        min_value=min_date,
+        max_value=max_date,
+        value=(min_date, max_date),
+        step=timedelta(days=1)
     )
 
 all_teams = sorted(df['teamName'].unique())
