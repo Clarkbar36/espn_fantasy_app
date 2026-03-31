@@ -82,7 +82,7 @@ with st.container():
         y_axis_format = None  # Default formatting
 
     chart = alt.Chart(df_filtered).mark_line(point=True).encode(
-        x=alt.X("period:O", title="Day"),
+        x=alt.X("DATE:T", title="Date"),
         y=alt.Y(
             f"{selected_stat}:Q",
             title=selected_stat,
@@ -93,7 +93,7 @@ with st.container():
         tooltip=[
             alt.Tooltip("teamAbbrev:N", title="Team"),
             alt.Tooltip(f"{selected_stat}:Q", title=selected_stat),
-            alt.Tooltip("period:O", title="Week")
+            alt.Tooltip("DATE:T", title="Date")
         ]
 
     ).properties(
