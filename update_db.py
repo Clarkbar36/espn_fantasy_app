@@ -6,25 +6,25 @@ league = get_league()
 if date.today() == date(date.today().year, 3, 30) and len(league.draft) > 0:
     draft = get_draft(league, league.year)
 
-    write_table(db = 'paychex.lg', data = draft, table_name= 'draft', append_type= 'append')
+    write_table(data=draft, table_name='draft', append_type='append')
 
 teams = get_teams(league)
 
-write_table(db = 'paychex.lg', data = teams, table_name= 'teams', append_type= 'replace')
+write_table(data=teams, table_name='teams', append_type='replace')
 
-#matchup_id = newest_matchup(db = 'paychex.lg')
+#matchup_id = newest_matchup()
 
 matchups = league.box_scores(matchup_period=league.currentMatchupPeriod)
 
 matchups_to_load = transform_matchups(matchups, league.currentMatchupPeriod)
 
-write_table(db = 'paychex.lg', data = matchups_to_load, table_name= 'boxscore_wide', append_type= 'append')
+write_table(data=matchups_to_load, table_name='boxscore_wide', append_type='append')
 
 total_powerscore = powerscore('total')
-write_table(db = 'paychex.lg', data = total_powerscore, table_name= 'total_powerscore', append_type= 'replace')
+write_table(data=total_powerscore, table_name='total_powerscore', append_type='replace')
 
 cum_powerscore = powerscore('cumulative')
-write_table(db = 'paychex.lg', data = cum_powerscore, table_name= 'cum_powerscore', append_type= 'replace')
+write_table(data=cum_powerscore, table_name='cum_powerscore', append_type='replace')
 
 ## table for stats daily, for graphic
 

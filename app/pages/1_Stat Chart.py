@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
 import altair as alt
+import sys
 import os
 from datetime import timedelta
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from espn.sql_io import get_engine
 
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -16,16 +19,14 @@ st.markdown("""
 
 col1, col2, col3 = st.columns([1, 2, 3])
 
-db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.db')
-
-conn = sqlite3.connect(db_path)
+engine = get_engine()
 
 # Load data - select specific columns to avoid duplicates from JOIN
 df = pd.read_sql("""
   SELECT bw.DATE, bw.period, bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev
-  FROM boxscore_wide bw 
+  FROM boxscore_wide bw
   LEFT JOIN teams on bw.teamId = teams.teamId
-""", conn)
+""", engine)
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']

@@ -3,9 +3,10 @@
 # Optionally expose your functions at the package level
 from .api import get_league
 from .transform import get_teams, get_draft, transform_matchups, powerscore
-from .sql_io import newest_matchup, write_table, read_table
+from .sql_io import get_engine, newest_matchup, write_table, read_table
 
 __all__ = [
+    "get_engine",
     "get_league",
     "get_teams",
     "get_draft",

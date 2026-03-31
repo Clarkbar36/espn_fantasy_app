@@ -95,7 +95,7 @@ def powerscore(type):
         'SVHD': True
     }
     if type == 'total':
-        data = read_table(db='paychex.lg', table_name='totals')
+        data = read_table(table_name='totals')
 
         cols = ['teamId'] + list(categories.keys())
         data = data[cols]
@@ -113,7 +113,7 @@ def powerscore(type):
 
         return data
     else:
-        data = read_table(db='paychex.lg', table_name='cumulative')
+        data = read_table(table_name='cumulative')
         cols = ['teamId', 'period'] + list(categories.keys())
         data = data[cols]
 

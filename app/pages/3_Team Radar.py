@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
-import os
 import plotly.graph_objects as go
+import sys
+import os
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from espn.sql_io import get_engine
+from sqlalchemy import text
 
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -13,23 +17,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.db')
-
-conn = sqlite3.connect(db_path)
+engine = get_engine()
 
 # Load the data from the total_powerscore table
 query = "SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore.teamId = teams.teamId"
-df = pd.read_sql(query, conn)
+df = pd.read_sql(query, engine)
 
-cursor = conn.cursor()
-
-# Query to get the maximum value of a specific column, e.g., 'OBP' from the 'cumulative' table
-cursor.execute("SELECT MAX(DATE) FROM boxscore_wide")
-
-period = cursor.fetchone()[0]
-
-conn.commit()
-conn.close()
+with engine.connect() as conn:
+    result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
+    period = result.scalar()
 
 with st.container():
     # Select the team for which you want to display the radar chart
