@@ -18,12 +18,14 @@ col1, col2, col3 = st.columns([1, 2, 3])
 
 db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'db', 'paychex.lg.db')
 
-db_path = os.path.join('db/paychex.lg.db')
-
 conn = sqlite3.connect(db_path)
 
-# Load data
-df = pd.read_sql("SELECT * FROM cumulative LEFT JOIN teams on cumulative.teamId = teams.teamId", conn)
+# Load data - select specific columns to avoid duplicates from JOIN
+df = pd.read_sql("""
+    SELECT cumulative.*, teams.teamName, teams.teamAbbrev
+    FROM cumulative
+    LEFT JOIN teams ON cumulative.teamId = teams.teamId
+""", conn)
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
@@ -87,10 +89,9 @@ with st.container():
             scale=alt.Scale(domain=[y_min, y_max]),
             axis=alt.Axis(format=y_axis_format) if y_axis_format else alt.Axis()
         ),
-        color=alt.Color("team:N", legend=alt.Legend(title="Team"))
-        ,
+        color=alt.Color("teamAbbrev:N", legend=alt.Legend(title="Team")),
         tooltip=[
-            alt.Tooltip("team:N", title="Team"),  # This ensures "Team" is capitalized in the tooltip
+            alt.Tooltip("teamAbbrev:N", title="Team"),
             alt.Tooltip(f"{selected_stat}:Q", title=selected_stat),
             alt.Tooltip("period:O", title="Week")
         ]
