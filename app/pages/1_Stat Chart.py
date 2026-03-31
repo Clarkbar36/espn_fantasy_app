@@ -40,11 +40,11 @@ max_stat = df[selected_stat].max()
 y_min = min_stat - 0.05 * (max_stat - min_stat)
 y_max = max_stat + 0.05 * (max_stat - min_stat)
 
-# Convert DATE strings to datetime.date objects
-df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y").dt.date
+# Convert DATE strings to datetime
+df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y")
 
-min_date = df["DATE"].min()
-max_date = df["DATE"].max()
+min_date = df["DATE"].min().date()
+max_date = df["DATE"].max().date()
 
 with col2:
     week_range = st.slider(
@@ -66,8 +66,8 @@ with col3:
 
 # Filter data
 df_filtered = df[
-    (df["DATE"] >= week_range[0]) &
-    (df["DATE"] <= week_range[1]) &
+    (df["DATE"].dt.date >= week_range[0]) &
+    (df["DATE"].dt.date <= week_range[1]) &
     (df["teamName"].isin(selected_teams))
 ]
 
