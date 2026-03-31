@@ -20,7 +20,7 @@ conn.close()
 
 st.title("🏟️ Paychex Baseball League Dashboard")
 st.write(f"📊 Data last updated through **Week {period}**")
-st.write("Welcome to the 2025 season dashboard! Use the sidebar to explore different views of your team’s performance.")
+st.write("Welcome to the 2026 season dashboard! Use the sidebar to explore different views of your team’s performance.")
 st.markdown("---")
 
 st.subheader("📈 Stat Chart")
