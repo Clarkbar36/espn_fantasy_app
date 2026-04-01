@@ -8,10 +8,16 @@ from sqlalchemy import text
 
 st.set_page_config(layout="wide")
 
-engine = get_engine()
-with engine.connect() as conn:
-    result = conn.execute(text("SELECT MAX(period) FROM boxscore_wide"))
-    period = result.scalar()
+
+@st.cache_data(ttl=72000)
+def get_current_period():
+    engine = get_engine()
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT MAX(period) FROM boxscore_wide"))
+        return result.scalar()
+
+
+period = get_current_period()
 
 st.title("Paychex Baseball League Dashboard")
 st.write(f"Data last updated through **Week {period}**")

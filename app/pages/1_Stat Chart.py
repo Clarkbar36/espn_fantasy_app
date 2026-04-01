@@ -17,16 +17,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
+@st.cache_data(ttl=72000)
+def load_boxscore_data():
+    engine = get_engine()
+    return pd.read_sql("""
+      SELECT bw.DATE, bw.period, bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev
+      FROM boxscore_wide bw
+      LEFT JOIN teams on bw.teamId = teams.teamId
+    """, engine)
+
+
 col1, col2, col3 = st.columns([1, 2, 3])
 
-engine = get_engine()
-
-# Load data - select specific columns to avoid duplicates from JOIN
-df = pd.read_sql("""
-  SELECT bw.DATE, bw.period, bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev
-  FROM boxscore_wide bw
-  LEFT JOIN teams on bw.teamId = teams.teamId
-""", engine)
+df = load_boxscore_data()
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']

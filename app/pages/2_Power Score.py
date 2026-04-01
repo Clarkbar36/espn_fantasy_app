@@ -16,29 +16,33 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-engine = get_engine()
 
-# Load data
-query = '''SELECT teamName AS Team,
- PowerScore,
- OBP_rank AS'OBP Rank',
- R_rank AS 'R Rank',
- RBI_rank AS 'RBI Rank',
- SB_rank AS 'SB Rank',
- TB_rank AS 'TB Rank',
- RC_rank AS 'RC Rank',
- ERA_rank AS 'ERA Rank',
- WHIP_rank AS 'WHIP Rank',
- QS_rank AS 'QS Rank',
- K_rank AS 'K Rank',
- SVHD_rank AS 'SVHLD Rank'
- FROM total_powerscore
-LEFT JOIN teams on total_powerscore.teamId = teams.teamId'''
-df = pd.read_sql(query, engine)
+@st.cache_data(ttl=72000)
+def load_powerscore_data():
+    engine = get_engine()
+    query = '''SELECT teamName AS Team,
+     PowerScore,
+     OBP_rank AS'OBP Rank',
+     R_rank AS 'R Rank',
+     RBI_rank AS 'RBI Rank',
+     SB_rank AS 'SB Rank',
+     TB_rank AS 'TB Rank',
+     RC_rank AS 'RC Rank',
+     ERA_rank AS 'ERA Rank',
+     WHIP_rank AS 'WHIP Rank',
+     QS_rank AS 'QS Rank',
+     K_rank AS 'K Rank',
+     SVHD_rank AS 'SVHLD Rank'
+     FROM total_powerscore
+    LEFT JOIN teams on total_powerscore.teamId = teams.teamId'''
+    df = pd.read_sql(query, engine)
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
+        period = result.scalar()
+    return df, period
 
-with engine.connect() as conn:
-    result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
-    period = result.scalar()
+
+df, period = load_powerscore_data()
 
 with st.container():
     # Display header

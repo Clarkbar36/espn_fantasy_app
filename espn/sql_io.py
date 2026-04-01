@@ -8,7 +8,7 @@ def get_engine():
     if url:
         if url.startswith('postgres://'):
             url = url.replace('postgres://', 'postgresql://', 1)
-        return create_engine(url, pool_pre_ping=True)
+        return create_engine(url)
     return create_engine('sqlite:///db/paychex.lg.db')
 
 

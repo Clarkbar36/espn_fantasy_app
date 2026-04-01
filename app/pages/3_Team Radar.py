@@ -17,15 +17,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-engine = get_engine()
 
-# Load the data from the total_powerscore table
-query = "SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore.teamId = teams.teamId"
-df = pd.read_sql(query, engine)
+@st.cache_data(ttl=72000)
+def load_radar_data():
+    engine = get_engine()
+    query = "SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore.teamId = teams.teamId"
+    df = pd.read_sql(query, engine)
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
+        period = result.scalar()
+    return df, period
 
-with engine.connect() as conn:
-    result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
-    period = result.scalar()
+
+df, period = load_radar_data()
 
 with st.container():
     # Select the team for which you want to display the radar chart
