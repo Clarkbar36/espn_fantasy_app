@@ -1,0 +1,3 @@
+[deploy]
+startCommand = "python update_db.py"
+cronSchedule = "45 11 * * *"  # your schedule here
