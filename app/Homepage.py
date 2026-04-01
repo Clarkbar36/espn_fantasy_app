@@ -20,7 +20,7 @@ def get_current_period():
 period, max_date = get_current_period()
 
 st.title("Paychex Baseball League Dashboard")
-st.write(f"Data last updated through **Week {period}** ({max_date})")
+st.write(f"Data last updated through **{max_date}**")
 st.write("Welcome to the 2026 season dashboard! Use the sidebar to explore different views of your team's performance.")
 st.markdown("---")
 
@@ -34,7 +34,7 @@ st.write(
 st.subheader("Power Score")
 st.write(
     "This ranking uses a roto-style approach, combining ranks from each stat category. "
-    "A lower score means a more balanced and dominant team across all metrics. Use this to spot teams that might be over- or under-performing in head-to-head matchups."
+    "A higher score means a more balanced and dominant team across all metrics. Use this to spot teams that might be over- or under-performing in head-to-head matchups."
 )
 
 st.subheader("Team Radar")
