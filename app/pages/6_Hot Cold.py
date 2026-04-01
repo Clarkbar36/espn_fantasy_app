@@ -84,6 +84,12 @@ df, current_week = load_hot_cold_data()
 st.title("Hot & Cold Teams")
 st.caption(f"Week {current_week} - Showing PowerScore momentum. Positive = trending up.")
 
+# Show warning if not enough data
+if current_week < 2:
+    st.info("Need at least 2 weeks of data to show trends. Check back after Week 2!")
+elif current_week < 3:
+    st.info("2-week trends will be available after Week 3.")
+
 # Sort options
 sort_by = st.radio("Sort by", ["1 Week Change", "2 Week Change", "vs Season Avg"], horizontal=True)
 
