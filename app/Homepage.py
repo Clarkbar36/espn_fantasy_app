@@ -20,10 +20,10 @@ def get_current_period():
 period, max_date = get_current_period()
 
 # Debug: show which database we're connected to
-db_url = os.getenv('DATABASE_URL', 'SQLite (no DATABASE_URL set)')
-test_var = os.getenv('TEST_VAR', 'TEST_VAR not set')
-st.caption(f"DB: {db_url[:30]}..." if len(db_url) > 30 else f"DB: {db_url}")
-st.caption(f"Test: {test_var}")
+db_url = os.environ.get('DATABASE_URL', 'not in os.environ')
+env_keys = [k for k in os.environ.keys() if 'DATABASE' in k or 'RAIL' in k or 'POST' in k]
+st.caption(f"DB: {db_url[:40]}..." if len(str(db_url)) > 40 else f"DB: {db_url}")
+st.caption(f"Relevant env keys: {env_keys}")
 
 st.title("Paychex Baseball League Dashboard")
 st.write(f"Data last updated through **Week {period}** ({max_date})")
