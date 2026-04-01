@@ -1,4 +1,4 @@
-from espn import get_league, get_teams, get_draft, transform_matchups, write_table, powerscore
+from espn import get_league, get_teams, get_draft, transform_matchups, write_table, powerscore, upsert_by_date
 from datetime import date
 
 league = get_league()
@@ -18,7 +18,8 @@ matchups = league.box_scores(matchup_period=league.currentMatchupPeriod)
 
 matchups_to_load = transform_matchups(matchups, league.currentMatchupPeriod)
 
-write_table(data=matchups_to_load, table_name='boxscore_wide', append_type='append')
+today = date.today().strftime("%m-%d-%Y")
+upsert_by_date(data=matchups_to_load, table_name='boxscore_wide', date_value=today)
 
 total_powerscore = powerscore('total')
 write_table(data=total_powerscore, table_name='total_powerscore', append_type='replace')

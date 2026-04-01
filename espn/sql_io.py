@@ -8,7 +8,7 @@ def get_engine():
     if url:
         if url.startswith('postgres://'):
             url = url.replace('postgres://', 'postgresql://', 1)
-        return create_engine(url)
+        return create_engine(url, pool_pre_ping=True)
     return create_engine('sqlite:///db/paychex.lg.db')
 
 
@@ -23,6 +23,15 @@ def newest_matchup():
 def write_table(data, table_name, append_type):
     engine = get_engine()
     data.to_sql(table_name, engine, if_exists=append_type, index=False)
+
+
+def upsert_by_date(data, table_name, date_value):
+    """Insert rows, replacing any existing rows for the given date."""
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(text("DELETE FROM {} WHERE \"DATE\" = :date".format(table_name)), {"date": date_value})
+        conn.commit()
+    data.to_sql(table_name, engine, if_exists='append', index=False)
 
 
 def read_table(table_name):
