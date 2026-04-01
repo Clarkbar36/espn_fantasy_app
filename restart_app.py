@@ -2,10 +2,10 @@ import os
 import requests
 
 RAILWAY_TOKEN = os.getenv("RAILWAY_API_TOKEN")
-SERVICE_ID = os.getenv("RAILWAY_SERVICE_ID")
+SERVICE_ID = os.getenv("STREAMLIT_SERVICE_ID")
 
 if not RAILWAY_TOKEN or not SERVICE_ID:
-    print("Missing RAILWAY_API_TOKEN or RAILWAY_SERVICE_ID env vars")
+    print("Missing RAILWAY_API_TOKEN or STREAMLIT_SERVICE_ID env vars")
     exit(1)
 
 query = """
