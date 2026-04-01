@@ -9,18 +9,22 @@ from sqlalchemy import text
 st.set_page_config(layout="wide")
 
 
-@st.cache_data(ttl=72000)
 def get_current_period():
     engine = get_engine()
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT MAX(period) FROM boxscore_wide"))
-        return result.scalar()
+        period = conn.execute(text("SELECT MAX(period) FROM boxscore_wide")).scalar()
+        max_date = conn.execute(text("SELECT MAX(\"DATE\") FROM boxscore_wide")).scalar()
+        return period, max_date
 
 
-period = get_current_period()
+period, max_date = get_current_period()
+
+# Debug: show which database we're connected to
+db_url = os.getenv('DATABASE_URL', 'SQLite (no DATABASE_URL set)')
+st.caption(f"DB: {db_url[:30]}..." if len(db_url) > 30 else f"DB: {db_url}")
 
 st.title("Paychex Baseball League Dashboard")
-st.write(f"Data last updated through **Week {period}**")
+st.write(f"Data last updated through **Week {period}** ({max_date})")
 st.write("Welcome to the 2026 season dashboard! Use the sidebar to explore different views of your team's performance.")
 st.markdown("---")
 
