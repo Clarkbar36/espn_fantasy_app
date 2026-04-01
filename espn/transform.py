@@ -117,6 +117,10 @@ def powerscore(type):
         return data
     else:
         data = read_table(table_name='cumulative')
+
+        # Keep only latest date per team/period to avoid duplicates
+        data = data.sort_values('DATE').groupby(['teamId', 'period'], as_index=False).last()
+
         cols = ['teamId', 'period'] + list(categories.keys())
         data = data[cols]
 

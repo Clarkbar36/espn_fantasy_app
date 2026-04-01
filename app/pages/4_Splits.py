@@ -102,21 +102,46 @@ import altair as alt
 
 scatter_df = df[['teamAbbrev', 'HittingScore', 'PitchingScore']].copy()
 
-chart = alt.Chart(scatter_df).mark_circle(size=100).encode(
+# Calculate averages for baselines
+avg_hitting = scatter_df['HittingScore'].mean()
+avg_pitching = scatter_df['PitchingScore'].mean()
+
+# Main scatter plot with color by team
+points = alt.Chart(scatter_df).mark_circle(size=150).encode(
     x=alt.X('HittingScore:Q', title='Hitting Score'),
     y=alt.Y('PitchingScore:Q', title='Pitching Score'),
+    color=alt.Color('teamAbbrev:N', legend=alt.Legend(title='Team')),
     tooltip=['teamAbbrev', 'HittingScore', 'PitchingScore']
 ).properties(
     width=600,
-    height=400
+    height=500
 )
 
-text = chart.mark_text(
+# Team labels
+text = points.mark_text(
     align='left',
     baseline='middle',
-    dx=7
+    dx=10,
+    fontSize=12
 ).encode(
-    text='teamAbbrev'
+    text='teamAbbrev',
+    color=alt.value('white')
 )
 
-st.altair_chart(chart + text, use_container_width=True)
+# Horizontal baseline (average pitching)
+h_line = alt.Chart(pd.DataFrame({'y': [avg_pitching]})).mark_rule(
+    strokeDash=[5, 5],
+    color='gray'
+).encode(y='y:Q')
+
+# Vertical baseline (average hitting)
+v_line = alt.Chart(pd.DataFrame({'x': [avg_hitting]})).mark_rule(
+    strokeDash=[5, 5],
+    color='gray'
+).encode(x='x:Q')
+
+chart = (points + text + h_line + v_line)
+
+st.altair_chart(chart, use_container_width=True)
+
+st.caption("Dashed lines show league average. Top-right = elite in both. Bottom-left = struggling in both.")

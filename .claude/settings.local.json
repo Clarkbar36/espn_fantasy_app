@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /c/Users/aclark5/PycharmProjects/espn_fantasy_app/*.py)",
+      "Bash(sqlite3 /c/Users/aclark5/PycharmProjects/espn_fantasy_app/db/paychex.lg.db \".schema boxscore_wide\")"
+    ]
+  }
+}
