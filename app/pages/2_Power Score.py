@@ -47,10 +47,10 @@ df, period = load_powerscore_data()
 with st.container():
     # Display header
     st.title("Power Score Table")
-    st.caption(f"Updated through Week {period}. Ranked stats (1 = best).")
+    st.caption(f"Updated through {period}. Higher PowerScore = better. Ranked stats (1 = best).")
 
-    # Sort by PowerScore descending
-    df_sorted = df.sort_values(by="PowerScore", ascending=True)
+    # Sort by PowerScore (higher = better)
+    df_sorted = df.sort_values(by="PowerScore", ascending=False)
 
     # Round ranks for cleaner display
     rank_columns = [col for col in df.columns if col.endswith("_rank")]

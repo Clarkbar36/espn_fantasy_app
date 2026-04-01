@@ -48,12 +48,14 @@ def create_team_df(team_stats, team_id, matchup_period):
 
  # Function to rank per week
 def rank_week(group, categories):
+    num_teams = len(group)
     for stat, high_is_better in categories.items():
         group[f'{stat}_rank'] = group[stat].rank(
             ascending=not high_is_better, method='min'
         )
     rank_cols = [f'{stat}_rank' for stat in categories]
-    group['PowerScore'] = group[rank_cols].sum(axis=1)
+    # Higher PowerScore = better (convert ranks so rank 1 gives most points)
+    group['PowerScore'] = sum((num_teams + 1 - group[col]) for col in rank_cols)
     return group
 
 def transform_matchups(matchups, matchup_id):
@@ -99,17 +101,18 @@ def powerscore(type):
 
         cols = ['teamId'] + list(categories.keys())
         data = data[cols]
+        num_teams = len(data)
 
-        # Create rankings per stat
+        # Create rankings per stat (rank 1 = best)
         for stat, ascending in categories.items():
-            data[f'{stat}_rank'] = data[stat].rank(ascending=not ascending, method='min')  # lower rank is better
+            data[f'{stat}_rank'] = data[stat].rank(ascending=not ascending, method='min')
 
-        # Compute power score
+        # Compute power score (higher = better)
         rank_cols = [f'{stat}_rank' for stat in categories]
-        data['PowerScore'] = data[rank_cols].sum(axis=1)
+        data['PowerScore'] = sum((num_teams + 1 - data[col]) for col in rank_cols)
 
-        # Sort by power score
-        data = data.sort_values(by='PowerScore')
+        # Sort by power score (descending - higher is better)
+        data = data.sort_values(by='PowerScore', ascending=False)
 
         return data
     else:
@@ -121,7 +124,7 @@ def powerscore(type):
             lambda g: rank_week(g, categories)
         )
 
-        # Now it's safe to sort
-        data = data.sort_values(["period", "PowerScore"])
+        # Now it's safe to sort (higher PowerScore = better)
+        data = data.sort_values(["period", "PowerScore"], ascending=[True, False])
 
         return data
