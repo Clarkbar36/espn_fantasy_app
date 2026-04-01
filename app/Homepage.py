@@ -20,10 +20,17 @@ def get_current_period():
 period, max_date = get_current_period()
 
 # Debug: show which database we're connected to
-db_url = os.environ.get('DATABASE_URL', 'not in os.environ')
-env_keys = [k for k in os.environ.keys() if 'DATABASE' in k or 'RAIL' in k or 'POST' in k]
-st.caption(f"DB: {db_url[:40]}..." if len(str(db_url)) > 40 else f"DB: {db_url}")
-st.caption(f"Relevant env keys: {env_keys}")
+db_url = os.environ.get('DATABASE_URL')
+source = "env"
+if not db_url:
+    try:
+        with open('/tmp/db_url', 'r') as f:
+            db_url = f.read().strip()
+            source = "file"
+    except FileNotFoundError:
+        db_url = "not found"
+        source = "none"
+st.caption(f"DB ({source}): {db_url[:40]}..." if len(str(db_url)) > 40 else f"DB ({source}): {db_url}")
 
 st.title("Paychex Baseball League Dashboard")
 st.write(f"Data last updated through **Week {period}** ({max_date})")

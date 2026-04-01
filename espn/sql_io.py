@@ -5,6 +5,13 @@ from sqlalchemy import create_engine, text
 
 def get_engine():
     url = os.getenv('DATABASE_URL')
+    # Fallback: read from file if env var not available (Railway workaround)
+    if not url:
+        try:
+            with open('/tmp/db_url', 'r') as f:
+                url = f.read().strip()
+        except FileNotFoundError:
+            pass
     if url:
         if url.startswith('postgres://'):
             url = url.replace('postgres://', 'postgresql://', 1)
