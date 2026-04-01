@@ -45,3 +45,30 @@ st.write(
     "Conversely, points closer to the center indicate lower rankings in that category. "
     "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
 )
+
+st.subheader("Splits")
+st.write(
+    "Break down team performance into **Hitting** and **Pitching** scores. "
+    "See which teams are one-dimensional vs. well-rounded with a scatter plot showing hitting vs. pitching performance. "
+    "Teams in the top-right are elite in both; bottom-left are struggling across the board."
+)
+
+st.subheader("PowerScore Trends")
+st.write(
+    "Track how each team's PowerScore has changed **week-to-week** throughout the season. "
+    "Use this to identify teams that are surging or fading as the season progresses."
+)
+
+st.subheader("Hot & Cold")
+st.write(
+    "See which teams are **trending up or down** based on recent performance. "
+    "Compare each team's current PowerScore to last week, two weeks ago, and their season average. "
+    "Quickly spot the hottest and coldest teams in the league."
+)
+
+st.subheader("Distributions")
+st.write(
+    "Visualize the **league-wide distribution** for each stat category using box plots. "
+    "Highlight a specific team to see where they fall in each distribution and view their percentile rankings. "
+    "Great for understanding if a team is an outlier or middle-of-the-pack in key categories."
+)
