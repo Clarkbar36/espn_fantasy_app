@@ -21,7 +21,9 @@ period, max_date = get_current_period()
 
 # Debug: show which database we're connected to
 db_url = os.getenv('DATABASE_URL', 'SQLite (no DATABASE_URL set)')
+test_var = os.getenv('TEST_VAR', 'TEST_VAR not set')
 st.caption(f"DB: {db_url[:30]}..." if len(db_url) > 30 else f"DB: {db_url}")
+st.caption(f"Test: {test_var}")
 
 st.title("Paychex Baseball League Dashboard")
 st.write(f"Data last updated through **Week {period}** ({max_date})")
