@@ -24,26 +24,11 @@ st.write(f"Data last updated through **{max_date}**")
 st.write("Welcome to the 2026 season dashboard! Use the sidebar to explore different views of your team's performance.")
 st.markdown("---")
 
-st.subheader("Stat Chart")
-st.write(
-    "Track cumulative totals for each stat week by week. "
-    "As the season unfolds, this chart will highlight the frontrunners in key categories like OBP, Runs, ERA, and more. "
-    "Use it to see where your team stands in the race for end-of-season stat awards."
-)
 
 st.subheader("Power Score")
 st.write(
     "This ranking uses a roto-style approach, combining ranks from each stat category. "
     "A higher score means a more balanced and dominant team across all metrics. Use this to spot teams that might be over- or under-performing in head-to-head matchups."
-)
-
-st.subheader("Team Radar")
-st.write(
-    "Visualize each team's strengths and weaknesses using radar charts. "
-    "Each axis represents a different stat category, and each team's line traces their **rank** in those stats. "
-    "**The farther a point is from the center, the better the team ranks** (with 1st place being at the outer edge). "
-    "Conversely, points closer to the center indicate lower rankings in that category. "
-    "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
 )
 
 st.subheader("Splits")
@@ -71,4 +56,20 @@ st.write(
     "Visualize the **league-wide distribution** for each stat category using box plots. "
     "Highlight a specific team to see where they fall in each distribution and view their percentile rankings. "
     "Great for understanding if a team is an outlier or middle-of-the-pack in key categories."
+)
+
+st.subheader("Stat Chart")
+st.write(
+    "Track cumulative totals for each stat week by week. "
+    "As the season unfolds, this chart will highlight the frontrunners in key categories like OBP, Runs, ERA, and more. "
+    "Use it to see where your team stands in the race for end-of-season stat awards."
+)
+
+st.subheader("Team Radar")
+st.write(
+    "Visualize each team's strengths and weaknesses using radar charts. "
+    "Each axis represents a different stat category, and each team's line traces their **rank** in those stats. "
+    "**The farther a point is from the center, the better the team ranks** (with 1st place being at the outer edge). "
+    "Conversely, points closer to the center indicate lower rankings in that category. "
+    "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
 )
