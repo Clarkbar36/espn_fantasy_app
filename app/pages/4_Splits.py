@@ -110,7 +110,7 @@ avg_pitching = scatter_df['PitchingScore'].mean()
 points = alt.Chart(scatter_df).mark_circle(size=150).encode(
     x=alt.X('HittingScore:Q', title='Hitting Score'),
     y=alt.Y('PitchingScore:Q', title='Pitching Score'),
-    color=alt.Color('teamAbbrev:N', legend=alt.Legend(title='Team')),
+    color=alt.Color('teamAbbrev:N', legend=alt.Legend(title='Team', orient='right', offset=40)),
     tooltip=['teamAbbrev', 'HittingScore', 'PitchingScore']
 ).properties(
     width=600,
