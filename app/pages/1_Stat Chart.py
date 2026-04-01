@@ -22,9 +22,9 @@ st.markdown("""
 def load_boxscore_data():
     engine = get_engine()
     return pd.read_sql("""
-      SELECT bw.DATE, bw.period, bw.OBP, bw.R, bw.RBI, bw.SB, bw.TB, bw.ERA, bw.WHIP, bw.QS, bw.K, bw.SVHD, teams.teamName, teams.teamAbbrev
+      SELECT bw."DATE", bw.period, bw."OBP", bw."R", bw."RBI", bw."SB", bw."TB", bw."ERA", bw."WHIP", bw."QS", bw."K", bw."SVHD", teams."teamName", teams."teamAbbrev"
       FROM boxscore_wide bw
-      LEFT JOIN teams on bw.teamId = teams.teamId
+      LEFT JOIN teams on bw."teamId" = teams."teamId"
     """, engine)
 
 

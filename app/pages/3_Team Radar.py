@@ -21,10 +21,10 @@ st.markdown("""
 @st.cache_data(ttl=72000)
 def load_radar_data():
     engine = get_engine()
-    query = "SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore.teamId = teams.teamId"
+    query = 'SELECT * FROM total_powerscore LEFT JOIN teams on total_powerscore."teamId" = teams."teamId"'
     df = pd.read_sql(query, engine)
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT MAX(DATE) FROM boxscore_wide"))
+        result = conn.execute(text('SELECT MAX("DATE") FROM boxscore_wide'))
         period = result.scalar()
     return df, period
 
