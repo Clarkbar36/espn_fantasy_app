@@ -118,7 +118,7 @@ with chart_col:
         title=f"{selected_stat} Race",
         xaxis_title="Date",
         yaxis_title="Rank",
-        xaxis=dict(tickformat='%m-%d'),
+        xaxis=dict(tickformat='%m-%d', dtick='D1'),
         yaxis=dict(
             autorange='reversed',  # 1st place at top
             tickmode='linear',
