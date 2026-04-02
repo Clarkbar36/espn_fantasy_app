@@ -105,15 +105,19 @@ def make_stat_chart(source_df, stat, highlight_team, height=300):
 
 
 st.subheader("Hitting Stats")
-cols = st.columns(len(HITTING_CATS))
-for i, stat in enumerate(HITTING_CATS):
-    with cols[i]:
-        chart = make_stat_chart(df, stat, highlight_team)
-        st.altair_chart(chart, use_container_width=True, key=f"hit_{stat}_{highlight_team}")
+hit_container = st.container(key=f"hitting_container_{highlight_team}")
+with hit_container:
+    cols = st.columns(len(HITTING_CATS))
+    for i, stat in enumerate(HITTING_CATS):
+        with cols[i]:
+            chart = make_stat_chart(df, stat, highlight_team)
+            st.altair_chart(chart, use_container_width=True, theme=None)
 
 st.subheader("Pitching Stats")
-cols = st.columns(len(PITCHING_CATS))
-for i, stat in enumerate(PITCHING_CATS):
-    with cols[i]:
-        chart = make_stat_chart(df, stat, highlight_team)
-        st.altair_chart(chart, use_container_width=True, key=f"pitch_{stat}_{highlight_team}")
+pitch_container = st.container(key=f"pitching_container_{highlight_team}")
+with pitch_container:
+    cols = st.columns(len(PITCHING_CATS))
+    for i, stat in enumerate(PITCHING_CATS):
+        with cols[i]:
+            chart = make_stat_chart(df, stat, highlight_team)
+            st.altair_chart(chart, use_container_width=True, theme=None)
