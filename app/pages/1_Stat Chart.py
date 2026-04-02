@@ -38,8 +38,11 @@ col1, col2 = st.columns([1, 3])
 
 df = load_boxscore_data()
 
-# Convert DATE strings to datetime
-df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y")
+# Convert DATE strings to datetime and normalize to date only (remove time component)
+df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y").dt.normalize()
+
+# Keep only one record per team per date (latest)
+df = df.sort_values('DATE').drop_duplicates(subset=['DATE', 'teamAbbrev'], keep='last')
 
 # Select categories to plot
 all_categories = ['OBP', 'R', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
