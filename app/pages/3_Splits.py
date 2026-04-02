@@ -63,38 +63,6 @@ def load_splits_data():
 df, max_date = load_splits_data()
 
 st.title("Hitter / Pitcher Splits")
-st.caption(f"Updated through {max_date}. Higher score = better. Ranks (1 = best).")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("Hitting")
-    hitting_cols = ['teamName', 'HittingScore'] + [f'{stat}_rank' for stat in HITTING_CATS]
-    hitting_df = df[hitting_cols].copy()
-    hitting_df.columns = ['Team', 'Score'] + [f'{stat}' for stat in HITTING_CATS]
-    hitting_df = hitting_df.sort_values('Score', ascending=False)
-
-    # Round ranks
-    for col in hitting_df.columns[2:]:
-        hitting_df[col] = hitting_df[col].astype(int)
-
-    st.dataframe(hitting_df, use_container_width=True, hide_index=True)
-
-with col2:
-    st.subheader("Pitching")
-    pitching_cols = ['teamName', 'PitchingScore'] + [f'{stat}_rank' for stat in PITCHING_CATS]
-    pitching_df = df[pitching_cols].copy()
-    pitching_df.columns = ['Team', 'Score'] + [f'{stat}' for stat in PITCHING_CATS]
-    pitching_df = pitching_df.sort_values('Score', ascending=False)
-
-    # Round ranks
-    for col in pitching_df.columns[2:]:
-        pitching_df[col] = pitching_df[col].astype(int)
-
-    st.dataframe(pitching_df, use_container_width=True, hide_index=True)
-
-st.markdown("---")
-
 # Scatter plot showing hitting vs pitching
 st.subheader("Hitting vs Pitching Performance")
 
@@ -145,3 +113,36 @@ chart = (points + text + h_line + v_line)
 st.altair_chart(chart, use_container_width=True)
 
 st.caption("Dashed lines show league average. Top-right = elite in both. Bottom-left = struggling in both.")
+
+st.markdown("---")
+
+st.caption(f"Updated through {max_date}. Higher score = better. Ranks (1 = best).")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Hitting")
+    hitting_cols = ['teamName', 'HittingScore'] + [f'{stat}_rank' for stat in HITTING_CATS]
+    hitting_df = df[hitting_cols].copy()
+    hitting_df.columns = ['Team', 'Score'] + [f'{stat}' for stat in HITTING_CATS]
+    hitting_df = hitting_df.sort_values('Score', ascending=False)
+
+    # Round ranks
+    for col in hitting_df.columns[2:]:
+        hitting_df[col] = hitting_df[col].astype(int)
+
+    st.dataframe(hitting_df, use_container_width=True, hide_index=True)
+
+with col2:
+    st.subheader("Pitching")
+    pitching_cols = ['teamName', 'PitchingScore'] + [f'{stat}_rank' for stat in PITCHING_CATS]
+    pitching_df = df[pitching_cols].copy()
+    pitching_df.columns = ['Team', 'Score'] + [f'{stat}' for stat in PITCHING_CATS]
+    pitching_df = pitching_df.sort_values('Score', ascending=False)
+
+    # Round ranks
+    for col in pitching_df.columns[2:]:
+        pitching_df[col] = pitching_df[col].astype(int)
+
+    st.dataframe(pitching_df, use_container_width=True, hide_index=True)
+
