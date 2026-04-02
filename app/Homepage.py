@@ -25,6 +25,13 @@ st.write("Welcome to the 2026 season dashboard! Use the sidebar to explore diffe
 st.markdown("---")
 
 
+st.subheader("Stat Race")
+st.write(
+    "Track the race for each stat category with a **bump chart** showing rank over time. "
+    "See the current standings and watch how positions have changed throughout the season. "
+    "Winner of each stat at season end gets paid out!"
+)
+
 st.subheader("Power Score")
 st.write(
     "This ranking uses a roto-style approach, combining ranks from each stat category. "
@@ -56,13 +63,6 @@ st.write(
     "Visualize the **league-wide distribution** for each stat category using box plots. "
     "Highlight a specific team to see where they fall in each distribution and view their percentile rankings. "
     "Great for understanding if a team is an outlier or middle-of-the-pack in key categories."
-)
-
-st.subheader("Stat Chart")
-st.write(
-    "Track cumulative totals for each stat week by week. "
-    "As the season unfolds, this chart will highlight the frontrunners in key categories like OBP, Runs, ERA, and more. "
-    "Use it to see where your team stands in the race for end-of-season stat awards."
 )
 
 st.subheader("Team Radar")
