@@ -34,7 +34,7 @@ PITCHING_CATS = {
 }
 
 
-@st.cache_data(ttl=72000)
+@st.cache_data(ttl=3600)
 def load_splits_data():
     engine = get_engine()
     query = 'SELECT * FROM total_powerscore LEFT JOIN teams ON total_powerscore."teamId" = teams."teamId"'

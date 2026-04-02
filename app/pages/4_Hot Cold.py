@@ -21,7 +21,7 @@ PITCHING_CATS = ['ERA', 'WHIP', 'QS', 'K', 'SVHD']
 LOWER_IS_BETTER = ['ERA', 'WHIP']
 
 
-@st.cache_data(ttl=72000)
+@st.cache_data(ttl=3600)
 def load_hot_cold_data():
     engine = get_engine()
 

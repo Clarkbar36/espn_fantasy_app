@@ -18,7 +18,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=72000)
+@st.cache_data(ttl=3600)
 def load_boxscore_data():
     engine = get_engine()
     return pd.read_sql("""

@@ -21,7 +21,7 @@ HITTING_CATS = ['OBP', 'R', 'RBI', 'SB', 'TB', 'RC']
 PITCHING_CATS = ['ERA', 'WHIP', 'QS', 'K', 'SVHD']
 
 
-@st.cache_data(ttl=72000)
+@st.cache_data(ttl=3600)
 def load_distribution_data():
     engine = get_engine()
     query = 'SELECT * FROM totals LEFT JOIN teams ON totals."teamId" = teams."teamId"'
