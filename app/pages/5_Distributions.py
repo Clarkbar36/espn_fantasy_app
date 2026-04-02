@@ -55,15 +55,13 @@ for stat in HITTING_CATS:
 
 hitting_df = pd.DataFrame(hitting_data)
 
-# Box plot
+# Box plot with faceting for independent scales
 box = alt.Chart(hitting_df).mark_boxplot(extent='min-max').encode(
-    x=alt.X('Stat:N', title=None),
-    y=alt.Y('Value:Q', title='Value'),
-).properties(height=300)
+    y=alt.Y('Value:Q', title=None),
+)
 
 # Overlay points for all teams
 points = alt.Chart(hitting_df).mark_circle(size=60, opacity=0.6).encode(
-    x=alt.X('Stat:N'),
     y=alt.Y('Value:Q'),
     tooltip=['Team', 'Stat', 'Value']
 )
@@ -71,14 +69,17 @@ points = alt.Chart(hitting_df).mark_circle(size=60, opacity=0.6).encode(
 # Highlight selected team
 if highlight_team != "None":
     highlight_df = hitting_df[hitting_df['Team'] == highlight_team]
-    highlight = alt.Chart(highlight_df).mark_circle(size=150, color='red').encode(
-        x=alt.X('Stat:N'),
+    highlight = alt.Chart(highlight_df).mark_circle(size=120, color='red').encode(
         y=alt.Y('Value:Q'),
         tooltip=['Team', 'Stat', 'Value']
     )
-    hitting_chart = box + points + highlight
+    hitting_chart = (box + points + highlight).facet(
+        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
+    ).resolve_scale(y='independent')
 else:
-    hitting_chart = box + points
+    hitting_chart = (box + points).facet(
+        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
+    ).resolve_scale(y='independent')
 
 st.altair_chart(hitting_chart, use_container_width=True)
 
@@ -97,15 +98,13 @@ for stat in PITCHING_CATS:
 
 pitching_df = pd.DataFrame(pitching_data)
 
-# Box plot
+# Box plot with faceting for independent scales
 box_p = alt.Chart(pitching_df).mark_boxplot(extent='min-max').encode(
-    x=alt.X('Stat:N', title=None),
-    y=alt.Y('Value:Q', title='Value'),
-).properties(height=300)
+    y=alt.Y('Value:Q', title=None),
+)
 
 # Overlay points
 points_p = alt.Chart(pitching_df).mark_circle(size=60, opacity=0.6).encode(
-    x=alt.X('Stat:N'),
     y=alt.Y('Value:Q'),
     tooltip=['Team', 'Stat', 'Value']
 )
@@ -113,14 +112,17 @@ points_p = alt.Chart(pitching_df).mark_circle(size=60, opacity=0.6).encode(
 # Highlight selected team
 if highlight_team != "None":
     highlight_df_p = pitching_df[pitching_df['Team'] == highlight_team]
-    highlight_p = alt.Chart(highlight_df_p).mark_circle(size=150, color='red').encode(
-        x=alt.X('Stat:N'),
+    highlight_p = alt.Chart(highlight_df_p).mark_circle(size=120, color='red').encode(
         y=alt.Y('Value:Q'),
         tooltip=['Team', 'Stat', 'Value']
     )
-    pitching_chart = box_p + points_p + highlight_p
+    pitching_chart = (box_p + points_p + highlight_p).facet(
+        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
+    ).resolve_scale(y='independent')
 else:
-    pitching_chart = box_p + points_p
+    pitching_chart = (box_p + points_p).facet(
+        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
+    ).resolve_scale(y='independent')
 
 st.altair_chart(pitching_chart, use_container_width=True)
 
