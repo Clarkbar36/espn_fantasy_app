@@ -47,7 +47,12 @@ df, period = load_powerscore_data()
 with st.container():
     # Display header
     st.title("Power Score Table")
-    st.caption(f"Updated through {period}. Higher PowerScore = better. Ranked stats (1 = best).")
+    st.caption(f"Updated through {period}")
+    st.markdown("""
+    **PowerScore** measures overall team strength by summing each team's rank across all 11 scoring categories.
+    A rank of 1 means best in the league for that stat. Lower ranks = better performance.
+    The PowerScore inverts this so that **higher PowerScore = stronger team**.
+    """)
 
     # Sort by PowerScore (higher = better)
     df_sorted = df.sort_values(by="PowerScore", ascending=False)
