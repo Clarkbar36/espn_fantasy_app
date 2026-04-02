@@ -40,73 +40,52 @@ st.caption(f"Updated through {max_date}. See where each team falls in the league
 # Team selector to highlight
 highlight_team = st.selectbox("Highlight Team", ["None"] + sorted(df['teamName'].unique().tolist()))
 
-def make_stat_chart(data_df, stat, highlight_team, width=120, height=350):
+def make_stat_chart(source_df, stat, highlight_team, height=300):
     """Create a single stat distribution chart."""
-    stat_data = data_df[data_df['Stat'] == stat]
+    # Get values for this stat
+    values = source_df[stat].tolist()
+    teams = source_df['teamName'].tolist()
+    stat_df = pd.DataFrame({'Value': values, 'Team': teams})
 
-    box = alt.Chart(stat_data).mark_boxplot(extent='min-max', size=30).encode(
-        y=alt.Y('Value:Q', title=None),
+    fmt = '.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f'
+
+    box = alt.Chart(stat_df).mark_boxplot(extent='min-max', size=30).encode(
+        y=alt.Y('Value:Q', title=stat),
+        tooltip=alt.value(None)
     )
 
-    points = alt.Chart(stat_data).mark_circle(size=60, opacity=0.6).encode(
+    points = alt.Chart(stat_df).mark_circle(size=60, opacity=0.6).encode(
         y=alt.Y('Value:Q'),
-        tooltip=['Team', alt.Tooltip('Value:Q', format='.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f')]
+        tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
     )
+
+    layers = [box, points]
 
     if highlight_team != "None":
-        highlight_data = stat_data[stat_data['Team'] == highlight_team]
-        highlight = alt.Chart(highlight_data).mark_circle(size=150, color='red').encode(
-            y=alt.Y('Value:Q'),
-            tooltip=['Team', alt.Tooltip('Value:Q', format='.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f')]
-        )
-        chart = box + points + highlight
-    else:
-        chart = box + points
+        highlight_df = stat_df[stat_df['Team'] == highlight_team]
+        if not highlight_df.empty:
+            highlight = alt.Chart(highlight_df).mark_circle(size=150, color='red').encode(
+                y=alt.Y('Value:Q'),
+                tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
+            )
+            layers.append(highlight)
 
-    return chart.properties(width=width, height=height, title=stat)
+    return alt.layer(*layers).properties(height=height)
 
 
 st.subheader("Hitting Stats")
-
-# Create data for hitting stats
-hitting_data = []
-for stat in HITTING_CATS:
-    for _, row in df.iterrows():
-        hitting_data.append({
-            'Stat': stat,
-            'Value': row[stat],
-            'Team': row['teamName'],
-            'Abbrev': row['teamAbbrev']
-        })
-
-hitting_df = pd.DataFrame(hitting_data)
-
-# Create individual charts and concatenate horizontally
-hitting_charts = [make_stat_chart(hitting_df, stat, highlight_team) for stat in HITTING_CATS]
-hitting_chart = alt.hconcat(*hitting_charts).resolve_scale(y='independent')
-
-st.altair_chart(hitting_chart, use_container_width=True)
+cols = st.columns(len(HITTING_CATS))
+for i, stat in enumerate(HITTING_CATS):
+    with cols[i]:
+        chart = make_stat_chart(df, stat, highlight_team)
+        st.altair_chart(chart, use_container_width=True)
 
 st.subheader("Pitching Stats")
-
-# Create data for pitching stats
-pitching_data = []
-for stat in PITCHING_CATS:
-    for _, row in df.iterrows():
-        pitching_data.append({
-            'Stat': stat,
-            'Value': row[stat],
-            'Team': row['teamName'],
-            'Abbrev': row['teamAbbrev']
-        })
-
-pitching_df = pd.DataFrame(pitching_data)
-
-# Create individual charts and concatenate horizontally
-pitching_charts = [make_stat_chart(pitching_df, stat, highlight_team) for stat in PITCHING_CATS]
-pitching_chart = alt.hconcat(*pitching_charts).resolve_scale(y='independent')
-
-st.altair_chart(pitching_chart, use_container_width=True)
+cols = st.columns(len(PITCHING_CATS))
+for i, stat in enumerate(PITCHING_CATS):
+    with cols[i]:
+        chart = make_stat_chart(df, stat, highlight_team)
+        st.altair_chart(chart, use_container_width=True)
 
 # Table showing percentiles for highlighted team
 if highlight_team != "None":
