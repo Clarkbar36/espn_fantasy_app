@@ -40,9 +40,35 @@ st.caption(f"Updated through {max_date}. See where each team falls in the league
 # Team selector to highlight
 highlight_team = st.selectbox("Highlight Team", ["None"] + sorted(df['teamName'].unique().tolist()))
 
+def make_stat_chart(data_df, stat, highlight_team, width=120, height=350):
+    """Create a single stat distribution chart."""
+    stat_data = data_df[data_df['Stat'] == stat]
+
+    box = alt.Chart(stat_data).mark_boxplot(extent='min-max', size=30).encode(
+        y=alt.Y('Value:Q', title=None),
+    )
+
+    points = alt.Chart(stat_data).mark_circle(size=60, opacity=0.6).encode(
+        y=alt.Y('Value:Q'),
+        tooltip=['Team', alt.Tooltip('Value:Q', format='.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f')]
+    )
+
+    if highlight_team != "None":
+        highlight_data = stat_data[stat_data['Team'] == highlight_team]
+        highlight = alt.Chart(highlight_data).mark_circle(size=150, color='red').encode(
+            y=alt.Y('Value:Q'),
+            tooltip=['Team', alt.Tooltip('Value:Q', format='.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f')]
+        )
+        chart = box + points + highlight
+    else:
+        chart = box + points
+
+    return chart.properties(width=width, height=height, title=stat)
+
+
 st.subheader("Hitting Stats")
 
-# Create box plots for hitting stats
+# Create data for hitting stats
 hitting_data = []
 for stat in HITTING_CATS:
     for _, row in df.iterrows():
@@ -55,37 +81,15 @@ for stat in HITTING_CATS:
 
 hitting_df = pd.DataFrame(hitting_data)
 
-# Box plot with faceting for independent scales
-box = alt.Chart(hitting_df).mark_boxplot(extent='min-max').encode(
-    y=alt.Y('Value:Q', title=None),
-)
-
-# Overlay points for all teams
-points = alt.Chart(hitting_df).mark_circle(size=60, opacity=0.6).encode(
-    y=alt.Y('Value:Q'),
-    tooltip=['Team', 'Stat', 'Value']
-)
-
-# Highlight selected team
-if highlight_team != "None":
-    highlight_df = hitting_df[hitting_df['Team'] == highlight_team]
-    highlight = alt.Chart(highlight_df).mark_circle(size=120, color='red').encode(
-        y=alt.Y('Value:Q'),
-        tooltip=['Team', 'Stat', 'Value']
-    )
-    hitting_chart = (box + points + highlight).facet(
-        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
-    ).resolve_scale(y='independent')
-else:
-    hitting_chart = (box + points).facet(
-        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
-    ).resolve_scale(y='independent')
+# Create individual charts and concatenate horizontally
+hitting_charts = [make_stat_chart(hitting_df, stat, highlight_team) for stat in HITTING_CATS]
+hitting_chart = alt.hconcat(*hitting_charts).resolve_scale(y='independent')
 
 st.altair_chart(hitting_chart, use_container_width=True)
 
 st.subheader("Pitching Stats")
 
-# Create box plots for pitching stats
+# Create data for pitching stats
 pitching_data = []
 for stat in PITCHING_CATS:
     for _, row in df.iterrows():
@@ -98,31 +102,9 @@ for stat in PITCHING_CATS:
 
 pitching_df = pd.DataFrame(pitching_data)
 
-# Box plot with faceting for independent scales
-box_p = alt.Chart(pitching_df).mark_boxplot(extent='min-max').encode(
-    y=alt.Y('Value:Q', title=None),
-)
-
-# Overlay points
-points_p = alt.Chart(pitching_df).mark_circle(size=60, opacity=0.6).encode(
-    y=alt.Y('Value:Q'),
-    tooltip=['Team', 'Stat', 'Value']
-)
-
-# Highlight selected team
-if highlight_team != "None":
-    highlight_df_p = pitching_df[pitching_df['Team'] == highlight_team]
-    highlight_p = alt.Chart(highlight_df_p).mark_circle(size=120, color='red').encode(
-        y=alt.Y('Value:Q'),
-        tooltip=['Team', 'Stat', 'Value']
-    )
-    pitching_chart = (box_p + points_p + highlight_p).facet(
-        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
-    ).resolve_scale(y='independent')
-else:
-    pitching_chart = (box_p + points_p).facet(
-        column=alt.Column('Stat:N', header=alt.Header(labelOrient='bottom', title=None))
-    ).resolve_scale(y='independent')
+# Create individual charts and concatenate horizontally
+pitching_charts = [make_stat_chart(pitching_df, stat, highlight_team) for stat in PITCHING_CATS]
+pitching_chart = alt.hconcat(*pitching_charts).resolve_scale(y='independent')
 
 st.altair_chart(pitching_chart, use_container_width=True)
 
