@@ -76,17 +76,22 @@ def make_stat_chart(source_df, stat, highlight_team, height=300):
     # Get values for this stat
     values = source_df[stat].tolist()
     teams = source_df['teamName'].tolist()
-    stat_df = pd.DataFrame({'Value': values, 'Team': teams})
+    stat_df = pd.DataFrame({'Value': values, 'Team': teams, 'Stat': stat})
 
     fmt = '.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f'
 
+    # Add padding to y-axis scale
+    y_scale = alt.Scale(padding=20)
+
     box = alt.Chart(stat_df).mark_boxplot(extent='min-max', size=30).encode(
-        y=alt.Y('Value:Q', title=stat),
+        x=alt.X('Stat:N', title=None, axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('Value:Q', title=None, scale=y_scale),
         tooltip=alt.value(None)
     )
 
     points = alt.Chart(stat_df).mark_circle(size=60, opacity=0.6).encode(
-        y=alt.Y('Value:Q'),
+        x=alt.X('Stat:N'),
+        y=alt.Y('Value:Q', scale=y_scale),
         tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
     )
 
@@ -96,7 +101,8 @@ def make_stat_chart(source_df, stat, highlight_team, height=300):
         highlight_df = stat_df[stat_df['Team'] == highlight_team]
         if not highlight_df.empty:
             highlight = alt.Chart(highlight_df).mark_circle(size=150, color='red').encode(
-                y=alt.Y('Value:Q'),
+                x=alt.X('Stat:N'),
+                y=alt.Y('Value:Q', scale=y_scale),
                 tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
             )
             layers.append(highlight)
