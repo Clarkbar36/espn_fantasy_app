@@ -40,6 +40,37 @@ st.caption(f"Updated through {max_date}. See where each team falls in the league
 # Team selector to highlight
 highlight_team = st.selectbox("Highlight Team", ["None"] + sorted(df['teamName'].unique().tolist()))
 
+# Table showing percentiles for highlighted team
+if highlight_team != "None":
+    st.subheader(f"{highlight_team} Percentiles")
+
+    team_row = df[df['teamName'] == highlight_team].iloc[0]
+    all_stats = HITTING_CATS + PITCHING_CATS
+
+    percentile_data = []
+    for stat in all_stats:
+        team_val = team_row[stat]
+        # For ERA/WHIP, lower is better so invert percentile
+        if stat in ['ERA', 'WHIP']:
+            pct = (df[stat] > team_val).sum() / len(df) * 100
+        else:
+            pct = (df[stat] < team_val).sum() / len(df) * 100
+        percentile_data.append({
+            'Stat': stat,
+            'Value': round(team_val, 3) if stat in ['OBP', 'ERA', 'WHIP'] else round(team_val, 1),
+            'Percentile': f"{pct:.0f}%",
+            'Category': 'Hitting' if stat in HITTING_CATS else 'Pitching'
+        })
+
+    pct_df = pd.DataFrame(percentile_data)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("**Hitting**")
+        st.dataframe(pct_df[pct_df['Category'] == 'Hitting'][['Stat', 'Value', 'Percentile']], hide_index=True)
+    with col2:
+        st.write("**Pitching**")
+        st.dataframe(pct_df[pct_df['Category'] == 'Pitching'][['Stat', 'Value', 'Percentile']], hide_index=True)
+
 def make_stat_chart(source_df, stat, highlight_team, height=300):
     """Create a single stat distribution chart."""
     # Get values for this stat
@@ -78,42 +109,11 @@ cols = st.columns(len(HITTING_CATS))
 for i, stat in enumerate(HITTING_CATS):
     with cols[i]:
         chart = make_stat_chart(df, stat, highlight_team)
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, use_container_width=True, key=f"hit_{stat}_{highlight_team}")
 
 st.subheader("Pitching Stats")
 cols = st.columns(len(PITCHING_CATS))
 for i, stat in enumerate(PITCHING_CATS):
     with cols[i]:
         chart = make_stat_chart(df, stat, highlight_team)
-        st.altair_chart(chart, use_container_width=True)
-
-# Table showing percentiles for highlighted team
-if highlight_team != "None":
-    st.subheader(f"{highlight_team} Percentiles")
-
-    team_row = df[df['teamName'] == highlight_team].iloc[0]
-    all_stats = HITTING_CATS + PITCHING_CATS
-
-    percentile_data = []
-    for stat in all_stats:
-        team_val = team_row[stat]
-        # For ERA/WHIP, lower is better so invert percentile
-        if stat in ['ERA', 'WHIP']:
-            pct = (df[stat] > team_val).sum() / len(df) * 100
-        else:
-            pct = (df[stat] < team_val).sum() / len(df) * 100
-        percentile_data.append({
-            'Stat': stat,
-            'Value': round(team_val, 3) if stat in ['OBP', 'ERA', 'WHIP'] else round(team_val, 1),
-            'Percentile': f"{pct:.0f}%",
-            'Category': 'Hitting' if stat in HITTING_CATS else 'Pitching'
-        })
-
-    pct_df = pd.DataFrame(percentile_data)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("**Hitting**")
-        st.dataframe(pct_df[pct_df['Category'] == 'Hitting'][['Stat', 'Value', 'Percentile']], hide_index=True)
-    with col2:
-        st.write("**Pitching**")
-        st.dataframe(pct_df[pct_df['Category'] == 'Pitching'][['Stat', 'Value', 'Percentile']], hide_index=True)
+        st.altair_chart(chart, use_container_width=True, key=f"pitch_{stat}_{highlight_team}")
