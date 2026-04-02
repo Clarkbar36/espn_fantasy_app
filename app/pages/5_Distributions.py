@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
+import plotly.graph_objects as go
 import sys
 import os
 
@@ -71,59 +71,76 @@ if highlight_team != "None":
         st.write("**Pitching**")
         st.dataframe(pct_df[pct_df['Category'] == 'Pitching'][['Stat', 'Value', 'Percentile']], hide_index=True)
 
-def make_stat_chart(source_df, stat, highlight_team, height=300):
-    """Create a single stat distribution chart."""
-    # Get values for this stat
+def make_stat_chart(source_df, stat, highlight_team, height=350):
+    """Create a single stat distribution chart using Plotly."""
     values = source_df[stat].tolist()
     teams = source_df['teamName'].tolist()
-    stat_df = pd.DataFrame({'Value': values, 'Team': teams, 'Stat': stat})
 
     fmt = '.3f' if stat in ['OBP', 'ERA', 'WHIP'] else '.1f'
 
-    # Add padding to y-axis scale
-    y_scale = alt.Scale(padding=20)
+    # Calculate y-axis range with padding
+    min_val, max_val = min(values), max(values)
+    padding = (max_val - min_val) * 0.1
+    y_range = [min_val - padding, max_val + padding]
 
-    box = alt.Chart(stat_df).mark_boxplot(extent='min-max', size=30).encode(
-        x=alt.X('Stat:N', title=None, axis=alt.Axis(labelAngle=0)),
-        y=alt.Y('Value:Q', title=None, scale=y_scale),
-        tooltip=alt.value(None)
-    )
+    fig = go.Figure()
 
-    points = alt.Chart(stat_df).mark_circle(size=60, opacity=0.6).encode(
-        x=alt.X('Stat:N'),
-        y=alt.Y('Value:Q', scale=y_scale),
-        tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
-    )
+    # Box plot
+    fig.add_trace(go.Box(
+        y=values,
+        name=stat,
+        boxpoints=False,
+        marker_color='steelblue',
+        line_color='steelblue',
+        hoverinfo='skip'
+    ))
 
-    layers = [box, points]
+    # Individual team points
+    fig.add_trace(go.Scatter(
+        y=values,
+        x=[stat] * len(values),
+        mode='markers',
+        marker=dict(size=10, color='steelblue', opacity=0.6),
+        text=teams,
+        hovertemplate='%{text}<br>' + stat + ': %{y:' + fmt + '}<extra></extra>',
+        showlegend=False
+    ))
 
+    # Highlighted team point
     if highlight_team != "None":
-        highlight_df = stat_df[stat_df['Team'] == highlight_team]
-        if not highlight_df.empty:
-            highlight = alt.Chart(highlight_df).mark_circle(size=150, color='red').encode(
-                x=alt.X('Stat:N'),
-                y=alt.Y('Value:Q', scale=y_scale),
-                tooltip=['Team', alt.Tooltip('Value:Q', format=fmt)]
-            )
-            layers.append(highlight)
+        team_idx = teams.index(highlight_team) if highlight_team in teams else None
+        if team_idx is not None:
+            fig.add_trace(go.Scatter(
+                y=[values[team_idx]],
+                x=[stat],
+                mode='markers',
+                marker=dict(size=16, color='red'),
+                text=[highlight_team],
+                hovertemplate='%{text}<br>' + stat + ': %{y:' + fmt + '}<extra></extra>',
+                showlegend=False
+            ))
 
-    return alt.layer(*layers).properties(height=height)
+    fig.update_layout(
+        height=height,
+        margin=dict(l=40, r=10, t=10, b=40),
+        yaxis=dict(range=y_range, title=None),
+        xaxis=dict(title=None),
+        showlegend=False
+    )
+
+    return fig
 
 
 st.subheader("Hitting Stats")
-hit_container = st.container(key=f"hitting_container_{highlight_team}")
-with hit_container:
-    cols = st.columns(len(HITTING_CATS))
-    for i, stat in enumerate(HITTING_CATS):
-        with cols[i]:
-            chart = make_stat_chart(df, stat, highlight_team)
-            st.altair_chart(chart, use_container_width=True, theme=None)
+cols = st.columns(len(HITTING_CATS))
+for i, stat in enumerate(HITTING_CATS):
+    with cols[i]:
+        fig = make_stat_chart(df, stat, highlight_team)
+        st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("Pitching Stats")
-pitch_container = st.container(key=f"pitching_container_{highlight_team}")
-with pitch_container:
-    cols = st.columns(len(PITCHING_CATS))
-    for i, stat in enumerate(PITCHING_CATS):
-        with cols[i]:
-            chart = make_stat_chart(df, stat, highlight_team)
-            st.altair_chart(chart, use_container_width=True, theme=None)
+cols = st.columns(len(PITCHING_CATS))
+for i, stat in enumerate(PITCHING_CATS):
+    with cols[i]:
+        fig = make_stat_chart(df, stat, highlight_team)
+        st.plotly_chart(fig, use_container_width=True)
