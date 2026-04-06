@@ -1,3 +1,6 @@
 .idea
 .venv
 espn/__pychace__
+espn/__pycache__/__init__.cpython-312.pyc
+espn/__pycache__/sql_io.cpython-312.pyc
+espn/__pycache__/transform.cpython-312.pyc
