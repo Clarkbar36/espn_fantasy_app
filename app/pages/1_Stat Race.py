@@ -25,9 +25,9 @@ LOWER_IS_BETTER = ['ERA', 'WHIP']
 def load_boxscore_data():
     engine = get_engine()
     return pd.read_sql("""
-      SELECT bw."DATE", bw.period, bw."OBP", bw."R", bw."RC", bw."RBI", bw."SB", bw."TB", bw."ERA", bw."WHIP", bw."QS", bw."K", bw."SVHD", teams."teamName", teams."teamAbbrev"
-      FROM boxscore_wide bw
-      LEFT JOIN teams on bw."teamId" = teams."teamId"
+      SELECT sc."DATE", sc.period, sc."OBP", sc."R", sc."RC", sc."RBI", sc."SB", sc."TB", sc."ERA", sc."WHIP", sc."QS", sc."K", sc."SVHD", teams."teamName", teams."teamAbbrev"
+      FROM season_cumulative sc
+      LEFT JOIN teams on sc."teamId" = teams."teamId"
     """, engine)
 
 

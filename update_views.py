@@ -1,22 +1,42 @@
 """
-Migrate data from local SQLite to PostgreSQL.
+Update PostgreSQL views without migrating data.
 
 Usage:
-  1. Get your DATABASE_URL from Railway dashboard
-  2. Run: DATABASE_URL="postgresql://..." uv run python migrate_to_postgres.py
+  $env:DATABASE_URL="postgresql://..."; uv run python update_views.py
 """
 import os
 from sqlalchemy import create_engine, text
-import pandas as pd
 
-TABLES = ['teams', 'draft', 'boxscore_wide', 'total_powerscore', 'cum_powerscore']
+pg_url = os.environ.get('DATABASE_URL')
+if not pg_url:
+    raise ValueError("Set DATABASE_URL environment variable to your Railway PostgreSQL URL")
 
+if pg_url.startswith('postgres://'):
+    pg_url = pg_url.replace('postgres://', 'postgresql://', 1)
+
+pg_engine = create_engine(pg_url)
+
+# View names to drop first (in dependency order)
+VIEWS_TO_DROP = ['season_cumulative', 'cumulative', 'totals']
+
+print("Dropping existing views...\n")
+
+with pg_engine.connect() as conn:
+    for view_name in VIEWS_TO_DROP:
+        try:
+            conn.execute(text(f'DROP VIEW IF EXISTS {view_name} CASCADE'))
+            conn.commit()
+            print(f"  {view_name}: dropped")
+        except Exception as e:
+            print(f"  {view_name}: drop failed ({e})")
+
+print("\nCreating views...\n")
+
+# Define views inline to avoid importing migrate_to_postgres (which runs migration code)
 VIEWS = {
     'totals': '''
-CREATE OR REPLACE VIEW totals AS
+CREATE VIEW totals AS
 WITH period_finals AS (
-    -- Get only the final row (max date) per team per period to avoid double-counting
-    -- Daily snapshots are already cumulative within each period
     SELECT DISTINCT ON ("teamId", period)
         "teamId", "AB", "B_BB", "B_SO", "CS", "ER", "GDP", "H", "HBP",
         "HLD", "K", "OUTS", "P_BB", "P_H", "QS", "R", "RBI", "RC",
@@ -40,9 +60,8 @@ SELECT "teamId",
 FROM period_finals GROUP BY "teamId"
 ''',
     'cumulative': '''
-CREATE OR REPLACE VIEW cumulative AS
+CREATE VIEW cumulative AS
 WITH period_finals AS (
-    -- Get only the final row (max date) per team per period to avoid double-counting
     SELECT DISTINCT ON ("teamId", period)
         "teamId", "DATE", period, "AB", "B_BB", "B_SO", "CS", "ER", "GDP", "H", "HBP",
         "HLD", "K", "OUTS", "P_BB", "P_H", "QS", "R", "RBI", "RC",
@@ -100,9 +119,8 @@ SELECT "teamId", "DATE", period,
 FROM period_finals
 ''',
     'season_cumulative': '''
-CREATE OR REPLACE VIEW season_cumulative AS
+CREATE VIEW season_cumulative AS
 WITH period_finals AS (
-    -- Get only the final row (max date) per team per period
     SELECT DISTINCT ON ("teamId", period)
         "teamId", period, "AB", "B_BB", "B_SO", "CS", "ER", "GDP", "H", "HBP",
         "HLD", "K", "OUTS", "P_BB", "P_H", "QS", "R", "RBI", "RC",
@@ -111,7 +129,6 @@ WITH period_finals AS (
     ORDER BY "teamId", period, "DATE" DESC
 ),
 prior_period_totals AS (
-    -- For each team/period, sum all PREVIOUS periods' final stats
     SELECT "teamId", period,
         COALESCE(SUM("AB") OVER w - "AB", 0) AS prior_AB,
         COALESCE(SUM("B_BB") OVER w - "B_BB", 0) AS prior_B_BB,
@@ -143,7 +160,6 @@ SELECT
     bw."QS" + COALESCE(pt.prior_QS, 0) AS "QS",
     bw."SVHD" + COALESCE(pt.prior_SVHD, 0) AS "SVHD",
     bw."RC" + COALESCE(pt.prior_RC, 0) AS "RC",
-    -- Recalculate rate stats from cumulative components
     CASE WHEN (bw."AB" + COALESCE(pt.prior_AB, 0) + bw."B_BB" + COALESCE(pt.prior_B_BB, 0) +
                bw."HBP" + COALESCE(pt.prior_HBP, 0) + bw."SF" + COALESCE(pt.prior_SF, 0)) > 0
         THEN ROUND(((bw."H" + COALESCE(pt.prior_H, 0) + bw."B_BB" + COALESCE(pt.prior_B_BB, 0) +
@@ -164,32 +180,6 @@ LEFT JOIN prior_period_totals pt ON bw."teamId" = pt."teamId" AND bw.period = pt
 '''
 }
 
-# Source: local SQLite
-sqlite_engine = create_engine('sqlite:///db/paychex.lg.db')
-
-# Target: PostgreSQL from DATABASE_URL
-pg_url = os.environ.get('DATABASE_URL')
-if not pg_url:
-    raise ValueError("Set DATABASE_URL environment variable to your Railway PostgreSQL URL")
-
-if pg_url.startswith('postgres://'):
-    pg_url = pg_url.replace('postgres://', 'postgresql://', 1)
-
-pg_engine = create_engine(pg_url)
-
-print("Migrating tables from SQLite to PostgreSQL...\n")
-
-for table in TABLES:
-    try:
-        df = pd.read_sql(f"SELECT * FROM {table}", sqlite_engine)
-        row_count = len(df)
-        df.to_sql(table, pg_engine, if_exists='replace', index=False)
-        print(f"  {table}: {row_count} rows migrated")
-    except Exception as e:
-        print(f"  {table}: SKIPPED ({e})")
-
-print("\nCreating views...\n")
-
 with pg_engine.connect() as conn:
     for view_name, view_sql in VIEWS.items():
         try:
@@ -199,4 +189,4 @@ with pg_engine.connect() as conn:
         except Exception as e:
             print(f"  {view_name}: FAILED ({e})")
 
-print("\nDone!")
+print("\nDone! Now run update_db.py to regenerate total_powerscore and cum_powerscore tables.")
