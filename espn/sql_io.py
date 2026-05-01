@@ -45,3 +45,29 @@ def read_table(table_name):
     engine = get_engine()
     data = pd.read_sql(f"SELECT * FROM {table_name}", engine)
     return data
+
+
+def write_h2h_matchups(df, season):
+    """Write H2H matchups, replacing existing rows for the given season."""
+    from sqlalchemy import inspect
+    engine = get_engine()
+
+    inspector = inspect(engine)
+    if inspector.has_table('h2h_matchups'):
+        with engine.connect() as conn:
+            conn.execute(text("DELETE FROM h2h_matchups WHERE season = :season"), {"season": season})
+            conn.commit()
+
+    df.to_sql('h2h_matchups', engine, if_exists='append', index=False)
+
+
+def read_h2h_matchups(season=None):
+    """Read H2H matchups from database, optionally filtered by season."""
+    engine = get_engine()
+    if season is not None:
+        return pd.read_sql(
+            text("SELECT * FROM h2h_matchups WHERE season = :season"),
+            engine,
+            params={"season": season}
+        )
+    return pd.read_sql("SELECT * FROM h2h_matchups", engine)

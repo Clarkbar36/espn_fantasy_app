@@ -1,4 +1,4 @@
-from espn import get_league, get_teams, get_draft, transform_matchups, write_table, powerscore, upsert_by_date
+from espn import get_league, get_teams, get_draft, transform_matchups, write_table, powerscore, upsert_by_date, collect_h2h_matchups, write_h2h_matchups
 from datetime import date, datetime
 
 league = get_league()
@@ -10,7 +10,7 @@ if date.today() == date(date.today().year, 3, 30) and len(league.draft) > 0:
 
 teams = get_teams(league)
 
-write_table(data=teams, table_name='teams', append_type='replace')
+#write_table(data=teams, table_name='teams', append_type='replace')
 
 #matchup_id = newest_matchup()
 
@@ -31,3 +31,7 @@ write_table(data=total_powerscore, table_name='total_powerscore', append_type='r
 
 cum_powerscore = powerscore('cumulative')
 write_table(data=cum_powerscore, table_name='cum_powerscore', append_type='replace')
+
+h2h_data = collect_h2h_matchups(league)
+if not h2h_data.empty:
+    write_h2h_matchups(h2h_data, league.year)

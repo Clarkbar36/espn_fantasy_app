@@ -132,3 +132,104 @@ def powerscore(type):
         data = data.sort_values(["period", "PowerScore"], ascending=[True, False])
 
         return data
+
+
+def collect_h2h_matchups(league):
+    """Collect all completed H2H matchup results for the season."""
+    completed_periods = league.currentMatchupPeriod - 1
+    if completed_periods < 1:
+        return pd.DataFrame(columns=['season', 'period', 'home_team_id', 'away_team_id',
+                                     'winner', 'home_cat_wins', 'away_cat_wins'])
+
+    records = []
+    for period in range(1, completed_periods + 1):
+        box_scores = league.box_scores(matchup_period=period)
+        for box in box_scores:
+            if box.away_team is None:
+                continue
+
+            if box.home_wins > box.away_wins:
+                winner = 'HOME'
+            elif box.away_wins > box.home_wins:
+                winner = 'AWAY'
+            else:
+                winner = 'TIE'
+
+            records.append({
+                'season': league.year,
+                'period': period,
+                'home_team_id': box.home_team.team_id,
+                'away_team_id': box.away_team.team_id,
+                'winner': winner,
+                'home_cat_wins': box.home_wins,
+                'away_cat_wins': box.away_wins,
+            })
+
+    return pd.DataFrame(records)
+
+
+def build_h2h_record_matrix(h2h_df, teams_df, season=None):
+    """Build a W-L-T record matrix from H2H matchup data."""
+    if season is not None:
+        h2h_df = h2h_df[h2h_df['season'] == season]
+
+    teams = dict(zip(teams_df['teamId'], teams_df['teamName']))
+    team_ids = list(teams.keys())
+
+    h2h = {tid: {oid: {'w': 0, 'l': 0, 't': 0} for oid in team_ids} for tid in team_ids}
+
+    for _, row in h2h_df.iterrows():
+        home_id = row['home_team_id']
+        away_id = row['away_team_id']
+
+        if row['winner'] == 'HOME':
+            h2h[home_id][away_id]['w'] += 1
+            h2h[away_id][home_id]['l'] += 1
+        elif row['winner'] == 'AWAY':
+            h2h[home_id][away_id]['l'] += 1
+            h2h[away_id][home_id]['w'] += 1
+        else:
+            h2h[home_id][away_id]['t'] += 1
+            h2h[away_id][home_id]['t'] += 1
+
+    matrix_data = []
+    for tid in team_ids:
+        row = {'Team': teams[tid]}
+        for oid in team_ids:
+            if tid == oid:
+                row[teams[oid]] = '-'
+            else:
+                r = h2h[tid][oid]
+                row[teams[oid]] = f"{r['w']}-{r['l']}-{r['t']}"
+        matrix_data.append(row)
+
+    return pd.DataFrame(matrix_data).set_index('Team')
+
+
+def build_h2h_category_matrix(h2h_df, teams_df, season=None):
+    """Build a total category wins matrix from H2H matchup data."""
+    if season is not None:
+        h2h_df = h2h_df[h2h_df['season'] == season]
+
+    teams = dict(zip(teams_df['teamId'], teams_df['teamName']))
+    team_ids = list(teams.keys())
+
+    cat_wins = {tid: {oid: 0 for oid in team_ids} for tid in team_ids}
+
+    for _, row in h2h_df.iterrows():
+        home_id = row['home_team_id']
+        away_id = row['away_team_id']
+        cat_wins[home_id][away_id] += row['home_cat_wins']
+        cat_wins[away_id][home_id] += row['away_cat_wins']
+
+    matrix_data = []
+    for tid in team_ids:
+        row = {'Team': teams[tid]}
+        for oid in team_ids:
+            if tid == oid:
+                row[teams[oid]] = '-'
+            else:
+                row[teams[oid]] = str(cat_wins[tid][oid])
+        matrix_data.append(row)
+
+    return pd.DataFrame(matrix_data).set_index('Team')
