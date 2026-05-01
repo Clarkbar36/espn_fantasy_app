@@ -35,8 +35,10 @@ if h2h_df.empty:
 else:
     col1, col2 = st.columns([1, 3])
 
+    season_options = ["All Seasons"] + [str(s) for s in seasons]
+
     with col1:
-        selected_season = st.selectbox("Season", seasons)
+        selected_season = st.selectbox("Season", season_options)
 
     with col2:
         matrix_type = st.radio(
@@ -45,14 +47,20 @@ else:
             horizontal=True
         )
 
-    completed_periods = h2h_df[h2h_df['season'] == selected_season]['period'].max()
-    st.caption(f"Results through matchup period {completed_periods}")
+    if selected_season == "All Seasons":
+        total_matchups = len(h2h_df)
+        st.caption(f"Combined results across {len(seasons)} seasons ({total_matchups} matchups)")
+        filter_season = None
+    else:
+        filter_season = int(selected_season)
+        completed_periods = h2h_df[h2h_df['season'] == filter_season]['period'].max()
+        st.caption(f"Results through matchup period {completed_periods}")
 
     if matrix_type == "Win-Loss Record":
         st.markdown("Each cell shows the row team's record against the column team (W-L-T).")
-        matrix = build_h2h_record_matrix(h2h_df, teams_df, season=selected_season)
+        matrix = build_h2h_record_matrix(h2h_df, teams_df, season=filter_season)
     else:
         st.markdown("Each cell shows total stat categories the row team has won against the column team.")
-        matrix = build_h2h_category_matrix(h2h_df, teams_df, season=selected_season)
+        matrix = build_h2h_category_matrix(h2h_df, teams_df, season=filter_season)
 
     st.dataframe(matrix, use_container_width=True)

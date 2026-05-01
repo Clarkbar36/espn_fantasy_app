@@ -73,3 +73,10 @@ st.write(
     "Conversely, points closer to the center indicate lower rankings in that category. "
     "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
 )
+
+st.subheader("H2H Matrix")
+st.write(
+    "View head-to-head results between all teams in a matrix format. "
+    "See your win-loss-tie record against each opponent, or dive deeper with total category wins. "
+    "Filter by season or view combined results across all seasons to identify your toughest rivals and easiest matchups."
+)
