@@ -6,6 +6,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from espn.sql_io import get_engine
+from espn.team_colors import get_team_colors
 
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -44,11 +45,14 @@ selected_teams = st.multiselect(
 
 df_filtered = df[df['teamName'].isin(selected_teams)]
 
+team_colors = get_team_colors()
+color_scale = alt.Scale(domain=list(team_colors.keys()), range=list(team_colors.values()))
+
 # Line chart
 chart = alt.Chart(df_filtered).mark_line(point=True).encode(
     x=alt.X('period:O', title='Week', axis=alt.Axis(labelAngle=0)),
     y=alt.Y('PowerScore:Q', title='PowerScore'),
-    color=alt.Color('teamAbbrev:N', legend=alt.Legend(title='Team')),
+    color=alt.Color('teamAbbrev:N', scale=color_scale, legend=alt.Legend(title='Team')),
     tooltip=[
         alt.Tooltip('teamAbbrev:N', title='Team'),
         alt.Tooltip('period:O', title='Week'),

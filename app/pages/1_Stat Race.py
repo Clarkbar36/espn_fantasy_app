@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 import sys
 import os
 from datetime import timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from espn.sql_io import get_engine
+from espn.team_colors import get_team_colors
 
 st.set_page_config(layout="wide")
 st.markdown("""
@@ -45,10 +45,7 @@ df = df.sort_values('DATE').drop_duplicates(subset=['DATE', 'teamAbbrev'], keep=
 
 all_categories = ['OBP', 'R', 'RC', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
 
-# Assign consistent colors to teams (based on full dataset so colors never shift)
-all_teams = df['teamAbbrev'].unique()
-palette = px.colors.qualitative.Plotly
-team_colors = {team: palette[i % len(palette)] for i, team in enumerate(all_teams)}
+team_colors = get_team_colors()
 
 # Current Leaders
 st.subheader("Current Leaders")

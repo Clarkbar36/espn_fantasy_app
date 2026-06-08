@@ -5,6 +5,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from espn.sql_io import get_engine
+from espn.team_colors import get_team_colors
 from sqlalchemy import text
 
 st.set_page_config(layout="wide")
@@ -74,11 +75,14 @@ scatter_df = df[['teamAbbrev', 'HittingScore', 'PitchingScore']].copy()
 avg_hitting = scatter_df['HittingScore'].mean()
 avg_pitching = scatter_df['PitchingScore'].mean()
 
+team_colors = get_team_colors()
+color_scale = alt.Scale(domain=list(team_colors.keys()), range=list(team_colors.values()))
+
 # Main scatter plot with color by team
 points = alt.Chart(scatter_df).mark_circle(size=150).encode(
     x=alt.X('HittingScore:Q', title='Hitting Score'),
     y=alt.Y('PitchingScore:Q', title='Pitching Score'),
-    color=alt.Color('teamAbbrev:N', legend=alt.Legend(title='Team', orient='right', offset=40)),
+    color=alt.Color('teamAbbrev:N', scale=color_scale, legend=alt.Legend(title='Team', orient='right', offset=40)),
     tooltip=['teamAbbrev', 'HittingScore', 'PitchingScore']
 ).properties(
     width=600,
