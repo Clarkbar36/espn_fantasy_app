@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import sys
 import os
 from datetime import timedelta
@@ -80,6 +81,11 @@ latest_standings = df_filtered[df_filtered['DATE'] == latest_date].sort_values('
 
 num_teams = df_filtered['teamName'].nunique()
 
+# Assign consistent colors to teams
+teams_ordered = df_filtered['teamAbbrev'].unique()
+palette = px.colors.qualitative.Plotly
+team_colors = {team: palette[i % len(palette)] for i, team in enumerate(teams_ordered)}
+
 # Layout: leaderboard on left, bump chart on right
 chart_col, leader_col = st.columns([4, 1])
 
@@ -90,27 +96,26 @@ with leader_col:
         team = row['teamAbbrev']
         val = row[selected_stat]
         fmt = f"{val:.3f}" if selected_stat in ['OBP', 'ERA', 'WHIP'] else f"{val:.0f}"
-        medal = ""
-        if rank == 1:
-            medal = " :first_place_medal:"
-        elif rank == 2:
-            medal = " :second_place_medal:"
-        elif rank == 3:
-            medal = " :third_place_medal:"
-        st.markdown(f"**{rank}.** {team} ({fmt}){medal}")
+        color = team_colors.get(team, '#888888')
+        st.markdown(
+            f'<span style="color:{color}; font-size:1.1em;">&#9679;</span> **{rank}.** {team} ({fmt})',
+            unsafe_allow_html=True
+        )
 
 with chart_col:
     # Create bump chart
     fig = go.Figure()
 
-    teams = df_filtered['teamAbbrev'].unique()
-    for team in teams:
+    for team in teams_ordered:
         team_data = df_filtered[df_filtered['teamAbbrev'] == team].sort_values('DATE')
+        color = team_colors[team]
         fig.add_trace(go.Scatter(
             x=team_data['DATE'],
             y=team_data['Rank'],
             mode='lines+markers',
             name=team,
+            line=dict(color=color),
+            marker=dict(color=color),
             hovertemplate=f'{team}<br>Rank: %{{y}}<br>%{{x|%m-%d-%Y}}<extra></extra>'
         ))
 
@@ -118,7 +123,7 @@ with chart_col:
         title=f"{selected_stat} Race",
         xaxis_title="Date",
         yaxis_title="Rank",
-        xaxis=dict(tickformat='%m-%d', dtick='D1'),
+        xaxis=dict(tickformat='%m-%d', nticks=12),
         yaxis=dict(
             autorange='reversed',  # 1st place at top
             tickmode='linear',
