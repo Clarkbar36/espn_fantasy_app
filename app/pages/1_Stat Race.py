@@ -35,8 +35,6 @@ def load_boxscore_data():
 st.title("Stat Race")
 st.caption("Track the race for each stat category. Winner of each stat at season end gets paid out.")
 
-col1, col2 = st.columns([1, 3])
-
 df = load_boxscore_data()
 
 # Convert DATE strings to datetime and normalize to date only (remove time component)
@@ -45,8 +43,36 @@ df["DATE"] = pd.to_datetime(df["DATE"], format="%m-%d-%Y").dt.normalize()
 # Keep only one record per team per date (latest)
 df = df.sort_values('DATE').drop_duplicates(subset=['DATE', 'teamAbbrev'], keep='last')
 
-# Select categories to plot
 all_categories = ['OBP', 'R', 'RC', 'RBI', 'SB', 'TB', 'ERA', 'WHIP', 'QS', 'K', 'SVHD']
+
+# Assign consistent colors to teams (based on full dataset so colors never shift)
+all_teams = df['teamAbbrev'].unique()
+palette = px.colors.qualitative.Plotly
+team_colors = {team: palette[i % len(palette)] for i, team in enumerate(all_teams)}
+
+# Current Leaders
+st.subheader("Current Leaders")
+latest_all = df[df['DATE'] == df['DATE'].max()]
+cols = st.columns(len(all_categories))
+for col, stat in zip(cols, all_categories):
+    ascending = stat in LOWER_IS_BETTER
+    leader_row = latest_all.loc[latest_all[stat].idxmin() if ascending else latest_all[stat].idxmax()]
+    team = leader_row['teamAbbrev']
+    val = leader_row[stat]
+    fmt = f"{val:.3f}" if stat in ['OBP', 'ERA', 'WHIP'] else f"{val:.0f}"
+    color = team_colors.get(team, '#888888')
+    with col:
+        st.metric(label=stat, value=fmt)
+        st.markdown(
+            f'<span style="color:{color}; font-size:1em;">&#9679;</span> {team}',
+            unsafe_allow_html=True
+        )
+
+st.divider()
+
+col1, col2 = st.columns([1, 3])
+
+# Select categories to plot
 with col1:
     selected_stat = st.selectbox("Select Stat", all_categories)
 
@@ -80,13 +106,9 @@ latest_date = df_filtered['DATE'].max()
 latest_standings = df_filtered[df_filtered['DATE'] == latest_date].sort_values('Rank')
 
 num_teams = df_filtered['teamName'].nunique()
-
-# Assign consistent colors to teams
 teams_ordered = df_filtered['teamAbbrev'].unique()
-palette = px.colors.qualitative.Plotly
-team_colors = {team: palette[i % len(palette)] for i, team in enumerate(teams_ordered)}
 
-# Layout: leaderboard on left, bump chart on right
+# Layout: bump chart on left, standings on right
 chart_col, leader_col = st.columns([4, 1])
 
 with leader_col:
