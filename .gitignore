@@ -7,3 +7,6 @@ espn/__pycache__/transform.cpython-312.pyc
 espn/__pycache__/__init__.cpython-312.pyc
 espn/__pycache__/sql_io.cpython-312.pyc
 espn/__pycache__/transform.cpython-312.pyc
+scripts/team_avg_age.py
+espn/__pycache__/api.cpython-311.pyc
+espn/__pycache__/__init__.cpython-311.pyc

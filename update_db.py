@@ -10,7 +10,7 @@ if date.today() == date(date.today().year, 3, 30) and len(league.draft) > 0:
 
 teams = get_teams(league)
 
-#write_table(data=teams, table_name='teams', append_type='replace')
+write_table(data=teams, table_name='teams', append_type='replace')
 
 #matchup_id = newest_matchup()
 

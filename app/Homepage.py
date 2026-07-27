@@ -65,15 +65,6 @@ st.write(
     "Great for understanding if a team is an outlier or middle-of-the-pack in key categories."
 )
 
-st.subheader("Team Radar")
-st.write(
-    "Visualize each team's strengths and weaknesses using radar charts. "
-    "Each axis represents a different stat category, and each team's line traces their **rank** in those stats. "
-    "The farther a point is from the center, the better the team ranks (with 1st place being at the outer edge). "
-    "Conversely, points closer to the center indicate lower rankings in that category. "
-    "Use this to quickly spot your team's strongest and weakest areas based on **total season stats** so far."
-)
-
 st.subheader("H2H Matrix")
 st.write(
     "View head-to-head results between all teams in a matrix format. "
